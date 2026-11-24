@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Гонка подарков</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Гонка">
+<meta name="theme-color" content="#070a1c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap&subset=cyrillic" rel="stylesheet">
@@ -92,10 +99,12 @@ td.r,th.r{text-align:right}
 @keyframes glow{50%{background:#5a4500}}
 @keyframes pulse{50%{--b:#ef3a55}}
 .hr{display:flex;align-items:center;gap:8px}
+#fsb{font-size:12px;padding:4px 8px;min-height:28px;margin:0;--b:#111;--l:#444;--d:#000}
+html.app #fsb{display:none}
 #ttb{font-size:8px;padding:6px 8px;min-height:28px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;gap:6px;margin:0}
 .led{width:8px;height:8px;background:#555;box-shadow:0 0 0 1px #000;display:inline-block}
 .led.on{background:#3cff6a}.led.wait{background:#ffd23f;animation:blink .6s steps(1) infinite}.led.err{background:#ff3b3b}
-#tov{z-index:20}.tbox{max-width:560px;text-align:left}
+#tov,#fov{z-index:20}.lbox p,.tbox p{text-align:left}.tbox{max-width:560px;text-align:left}
 .tbox h3{margin-top:12px}.tbox label{display:block;font-size:8px;color:var(--mute);margin:10px 0 4px}
 .tbox input{width:100%;font:inherit;font-size:9px;color:#7dff8a;background:#000;border:2px solid #fff;padding:9px 8px;margin:0;min-height:34px}
 .tbox details{margin-top:8px;font-size:8px;color:var(--mute)}.tbox summary{cursor:pointer;padding:4px 0}
@@ -120,7 +129,7 @@ td.r,th.r{text-align:right}
 </style>
 </head>
 <body>
-<h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
+<h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="fsb" title="Во весь экран">⛶</button><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
 
 <div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas></div>
 
@@ -157,6 +166,13 @@ td.r,th.r{text-align:right}
   <div id="trecent" class="chips"><span class="hint">пока пусто</span></div>
   <div class="row trow"><input id="ttest" placeholder="название для проверки, напр. Rose"><button id="ttestb">Проверить</button></div>
   <div class="row trow" style="justify-content:flex-end"><button id="tclose">Готово</button></div>
+</div></div>
+<div class="ov" id="fov"><div class="box pxf lbox">
+  <h3>⛶ Игра во весь экран на iPhone</h3>
+  <p class="hint">iPhone не даёт сайтам убирать панели браузера. Но игру можно поставить на экран «Домой» как приложение — тогда она открывается во весь экран, без адресной строки и кнопок.</p>
+  <p class="hint">1. Нажмите кнопку «Поделиться» <b style="color:#fff">⬆︎</b> (в Safari — внизу, в Chrome — в адресной строке).<br>2. Выберите <b style="color:#fff">«На экран „Домой“»</b> (может быть ниже в списке — пролистайте).<br>3. Нажмите <b style="color:#fff">«Добавить»</b>.<br>4. Запускайте игру с иконки «Гонка» на экране телефона.</p>
+  <p class="hint">Ник, фото, тексты и привязки подарков в приложении нужно будет ввести ещё раз один раз — iPhone хранит их отдельно от браузера.</p>
+  <div class="row lrow"><button id="fok">Понятно</button></div>
 </div></div>
 <div class="ov" id="lov"><div class="box pxf lbox">
   <h3 id="lt">Текст над очками</h3>
@@ -724,6 +740,16 @@ function ttInit(){ttLoad();ttBuildMap();
    if(j&&j.race){TT.srv=true;document.getElementById('tsrv').style.display='block';document.getElementById('tkeyw').style.display='none'}auto()}).catch(auto)}
  else auto();
 }
+/* полноэкранный режим */
+var isApp=(window.navigator.standalone===true)||(window.matchMedia&&(matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches));
+if(isApp)document.documentElement.classList.add('app');
+document.getElementById('fsb').onclick=function(){
+ var d=document.documentElement,rq=d.requestFullscreen||d.webkitRequestFullscreen;
+ if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}
+ var hint=function(){document.getElementById('fov').classList.add('show')};
+ if(rq&&!/iPhone|iPod/.test(navigator.userAgent)){try{var r=rq.call(d);if(r&&r.catch)r.catch(hint)}catch(e){hint()}}else hint()};
+document.getElementById('fok').onclick=function(){document.getElementById('fov').classList.remove('show')};
+document.addEventListener('fullscreenchange',function(){setTimeout(resize,100)});
 build();start();ttInit();requestAnimationFrame(loop);
 </script>
 </body>

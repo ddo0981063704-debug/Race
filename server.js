@@ -119,6 +119,14 @@ const server = http.createServer((req, res) => {
     req.on('close', () => { clearInterval(ka); leave(room, res); });
     return;
   }
+  const STATIC = { '/manifest.webmanifest': 'application/manifest+json', '/icon-180.png': 'image/png', '/icon-192.png': 'image/png', '/icon-512.png': 'image/png' };
+  if (STATIC[url.pathname]) {
+    return fs.readFile(path.join(__dirname, url.pathname.slice(1)), (err, buf) => {
+      if (err) { res.writeHead(404); return res.end('not found'); }
+      res.writeHead(200, { 'Content-Type': STATIC[url.pathname], 'Cache-Control': 'public, max-age=86400' });
+      res.end(buf);
+    });
+  }
   if (url.pathname === '/' || url.pathname === '/index.html') {
     return fs.readFile(GAME, (err, buf) => {
       if (err) { res.writeHead(500); return res.end('index.html не найден рядом с server.js'); }
