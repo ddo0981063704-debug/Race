@@ -1,0 +1,16 @@
+{
+  "name": "gift-race",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Гонка подарков — приёмник подарков TikTok LIVE",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.4.4"
+  }
+}
