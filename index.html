@@ -340,7 +340,7 @@ function buildScene(){
  L=Math.max(19,Math.min(30,Math.floor((GH-35-40)/5)));
  var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
- RM=Math.max(40,Math.min(64,Math.round(GW*.13)));RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
+ RM=Math.max(48,Math.min(70,Math.round(GW*.14)));RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
  seed=1234;buildStands();buildAsphalt();buildStrips();
  FLAGS=[];var k=0;for(var x=7;x<GW-9;x+=34){FLAGS.push({x:x,c:k%6===5?null:CARS[k%6===5?0:k%5].c});k++}
  CLOUDS=[];if(sky>=13)for(var i=0;i<Math.ceil(GW/90);i++)CLOUDS.push({x:R()*GW,y:2+RI(Math.max(1,sky-12)),w:12+RI(14),v:2+R()*3});
@@ -498,12 +498,12 @@ function draw(t){PI_init();
   g.fillStyle='#000';g.fillRect(bx,by,B,B);g.fillStyle=c;g.fillRect(bx+1,by+1,B-2,B-2);g.fillStyle=mix(c,'#ffffff',.4);g.fillRect(bx+1,by+1,B-2,1);
   if(LOGO_C[i]){g.drawImage(LOGO_C[i],bx+2,by+2,B-4,B-4);place(PI.lane[i],bx+2,by+2,B-4,B-4)}
   else{hide(PI.lane[i]);g.fillStyle=shade(c,.55);g.fillRect(bx+2,by+B-3,B-4,1);txtO(g,String(i+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
-  var s=disp[i].toLocaleString('ru-RU'),lc=LBL_C[i],sy,byy;
-  if(lc){var y0=ly+((L-17)>>1),ax=GW-RM+3,aw=RM-5;sy=y0+9;byy=y0+15;
+  var s=disp[i].toLocaleString('ru-RU'),lc=LBL_C[i],sy,byy,ss=(L>=(lc?23:16)&&tw(s,2)<=RM-4)?2:1;
+  if(lc){var y0=ly+((L-(ss>1?23:17))>>1),ax=GW-RM+3,aw=RM-5;sy=y0+9;byy=sy+5*ss+1;
    if(lc.width<=aw)g.drawImage(lc,GW-1-lc.width,y0);
    else{var per=lc.width+14,off=Math.floor((t*.025)%per);g.save();g.beginPath();g.rect(ax,y0,aw,lc.height);g.clip();g.drawImage(lc,ax-off,y0);g.drawImage(lc,ax-off+per,y0);g.restore()}}
-  else{sy=ly+(L>>1)-5;byy=ly+(L>>1)+3}
-  var cnt=disp[i]<pts[i];txt(g,s,GW-2-tw(s),sy-(cnt&&(Math.floor(t/60)&1)?1:0),cnt?'#ffffff':mix(c,'#ffffff',.25));
+  else{sy=ly+((L-(5*ss+3))>>1)-1;byy=sy+5*ss+1}
+  var cnt=disp[i]<pts[i];txt(g,s,GW-2-tw(s,ss),sy-(cnt&&(Math.floor(t/60)&1)?1:0),cnt?'#ffffff':mix(c,'#ffffff',.25),ss);
   g.fillStyle='#22252e';g.fillRect(GW-RM+3,byy,RM-5,2);g.fillStyle=c;g.fillRect(GW-RM+3,byy,Math.round((RM-5)*Math.min(1,shown[i]/GOAL)),2);
   }
  g.fillStyle='#2e313c';for(i=1;i<5;i++){g.fillRect(GW-RM,Y.track+i*L-1,RM,1);g.fillRect(0,Y.track+i*L-1,LM,1)}
