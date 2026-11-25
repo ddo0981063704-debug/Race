@@ -220,7 +220,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var GW=0,GH=0,LM=23,RM=25,CL=50,L=24,Y={},RUN=0,KM=1;
 var SPR=[],WH_R=[],WH_F=[],NWF=6,STANDS=[],AS=null,TOPS=null,BOTS=null,FLAGS=[],CLOUDS=[],CUP=null;
 var laneOff=[0,0,0,0,0],gOff=0,hype=0,cft=0,pops=[],disp=[0,0,0,0,0],carX=[0,0,0,0,0];
-var progF=0,winCar=-1,conf=[],LOGO_C=[null,null,null,null,null],LBL_C=[null,null,null,null,null];
+var LOGO_B=[null,null,null,null,null],progF=0,winCar=-1,conf=[],LOGO_C=[null,null,null,null,null],LBL_C=[null,null,null,null,null];
 /* текст → пиксельная надпись (без сглаживания) */
 function labelCanvas(str,col){var f='bold 8px Verdana,Tahoma,Arial,sans-serif',m=px(1,1).getContext('2d');m.font=f;
  var w=Math.max(1,Math.ceil(m.measureText(str).width)+2),c=px(w,8),g=c.getContext('2d');g.font=f;g.textBaseline='alphabetic';g.fillStyle='#fff';g.fillText(str,1,7);
@@ -237,10 +237,11 @@ function openLabel(i){lblI=i;var o=document.getElementById('lov'),n=document.get
  n.value=LABELS[i];o.classList.add('show');setTimeout(function(){n.focus()},50)}
 function closeLabel(){document.getElementById('lov').classList.remove('show')}
 /* загрузка фото в слот логотипа: картинка уменьшается до 16×16 и выглядит пиксельной */
-function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGOS[i]='';logoUI(i);if(save)saveLogos();return}
+function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGO_B[i]=null;LOGOS[i]='';logoUI(i);if(save)saveLogos();return}
  var im=new Image();im.onload=function(){var n=16,c=px(n,n),g=c.getContext('2d'),k=Math.min(im.width,im.height);
   g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,n,n);
   var b=px(64,64),q=b.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,64,64);
+  var c2=px(48,48),q2=c2.getContext('2d');q2.imageSmoothingQuality='high';q2.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,48,48);LOGO_B[i]=c2;
   LOGO_C[i]=c;LOGOS[i]=b.toDataURL('image/png');logoUI(i);if(save)saveLogos()};im.src=src}
 function saveLogos(){try{localStorage.setItem('raceLogos',JSON.stringify(LOGOS))}catch(e){}}
 function loadLogos(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLogos')||'null')}catch(e){}
@@ -323,7 +324,7 @@ function pixEmoji(e){return emoCanvas(e).toDataURL()}
 
 /* ---- сцена: раскладка и заранее нарисованные слои ---- */
 function buildScene(){
- L=Math.max(19,Math.min(26,Math.floor((GH-72-24)/5)));
+ L=Math.max(19,Math.min(26,Math.floor((GH-72-36)/5)));
  var crowdH=GH-72-5*L,rows=Math.max(2,Math.min(14,Math.floor(crowdH/6)));
  var sky=8+Math.max(0,crowdH-rows*6);
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=Y.crowd+rows*6;Y.prog=Y.ad+10;Y.strip=Y.prog+34;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
@@ -438,13 +439,7 @@ function drawCar(g,i,x,y,t,spd){
 }
 function draw(t){
  var g=ctx,i,x,y;
- g.drawImage(STANDS[Math.floor(cft)%4],0,0);
- CLOUDS.forEach(function(c){x=Math.round(c.x);y=c.y;g.fillStyle='#ffffff';g.fillRect(x+2,y,c.w-4,1);g.fillRect(x,y+1,c.w,3);g.fillRect(x+4,y-1,c.w>>1,1);g.fillStyle='#d4ecff';g.fillRect(x+1,y+3,c.w-2,1)});
- FLAGS.forEach(function(f,k){g.fillStyle='#d8dbe2';g.fillRect(f.x,1,1,Y.roof-1);
-  for(var cx=0;cx<7;cx++){var dy=Math.round(Math.sin(t/170-cx*.9+k*1.3)*.9);
-   if(f.c){g.fillStyle=f.c;g.fillRect(f.x+1+cx,1+dy,1,4);g.fillStyle=shade(f.c,.65);g.fillRect(f.x+1+cx,4+dy,1,1)}
-   else for(var cy=0;cy<4;cy++){g.fillStyle=((cx>>1)+(cy>>1))&1?'#111':'#fff';g.fillRect(f.x+1+cx,1+cy+dy,1,1)}}});
- if(Math.random()<.04+hype*.9){x=Math.floor(Math.random()*GW);y=Y.crowd+Math.floor(Math.random()*Y.rows*6);g.fillStyle='#ffffff';g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3)}
+ g.drawImage(STANDS[0],0,0);drawTop(g,t);
  drawProgress(g,t);
  g.drawImage(TOPS,Math.floor(gOff%16),0,GW,6,0,Y.strip,GW,6);
  for(i=0;i<5;i++)g.drawImage(AS,Math.floor(laneOff[i]%64),i*L,GW,L,0,Y.track+i*L,GW,L);
@@ -475,6 +470,26 @@ function draw(t){
   g.fillStyle='#22252e';g.fillRect(GW-RM+3,byy,RM-5,2);g.fillStyle=c;g.fillRect(GW-RM+3,byy,Math.round((RM-5)*Math.min(1,shown[i]/GOAL)),2);
   if(i<4){g.fillStyle='#2e313c';g.fillRect(GW-RM,ly+L-1,RM,1);g.fillRect(0,ly+L-1,LM,1)}}
  if(fs&&!fs.shown&&(Math.floor(t/250)&1)){var m='FINISH!';txtO(g,m,(GW-tw(m,2))>>1,Y.track+2,'#ffd23f',2)}
+}
+/* верхняя панель: пять иконок участников (вместо трибун) */
+function drawTop(g,t){var H=Y.ad,i,x,y;
+ g.fillStyle='#0b1030';g.fillRect(0,0,GW,H);
+ g.fillStyle='#10173f';for(y=0;y<H;y+=4)for(x=((y>>2)&1)*4;x<GW;x+=8)g.fillRect(x,y,4,4);
+ g.fillStyle='#2a3474';g.fillRect(0,H-1,GW,1);
+ var gap=Math.max(3,Math.round(GW*.025)),S=Math.max(12,Math.min(Math.floor((GW-gap*6)/5),H-7)),tot=5*S+4*gap,x0=(GW-tot)>>1,y0=((H-S)>>1)+2,
+  ld=ranking()[0],hasLead=pts[ld]>0;
+ for(i=0;i<5;i++){var c=CARS[i].c,b=boost[i]>0&&!fs,isL=hasLead&&i===ld,bl=Math.floor(t/250)&1;
+  x=x0+i*(S+gap);y=y0+(b&&(Math.floor(t/90)&1)?-1:0);
+  g.fillStyle='rgba(0,0,0,.45)';g.fillRect(x+1,y0+S+1,S,2);
+  g.fillStyle='#000';g.fillRect(x-1,y-1,S+2,S+2);
+  g.fillStyle=isL&&bl?'#ffd23f':c;g.fillRect(x,y,S,S);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x,y,S,1);
+  var ix=x+2,iy=y+2,is=S-4;
+  if(LOGO_B[i]){g.drawImage(LOGO_B[i],ix,iy,is,is)}
+  else{g.fillStyle=shade(c,.65);g.fillRect(ix,iy,is,is);var sc=is>=22?3:is>=14?2:1,n=String(i+1);txtO(g,n,x+((S-tw(n,sc))>>1),y+((S-5*sc)>>1),'#ffffff',sc)}
+  if(b&&(Math.floor(t/120)&1)){g.fillStyle='rgba(255,255,255,.5)';g.fillRect(ix,iy,is,1);g.fillRect(ix,iy+is-1,is,1);g.fillRect(ix,iy,1,is);g.fillRect(ix+is-1,iy,1,is)}
+  if(LOGO_B[i]){g.fillStyle='#000';g.fillRect(x+S-7,y+S-8,8,9);g.fillStyle=c;g.fillRect(x+S-6,y+S-7,6,7);txt(g,String(i+1),x+S-5,y+S-6,'#fff')}
+  if(isL){var cx=x+(S>>1)-3,cy=y-4;g.fillStyle='#000';g.fillRect(cx-1,cy-1,9,6);g.fillStyle='#ffd23f';g.fillRect(cx,cy+2,7,2);g.fillRect(cx,cy,1,2);g.fillRect(cx+3,cy,1,2);g.fillRect(cx+6,cy,1,2);g.fillStyle='#e8321c';g.fillRect(cx+3,cy+2,1,1)}
+ }
 }
 /* линия прогресса лидера между трибунами и трассой */
 function drawProgress(g,t){
