@@ -463,7 +463,7 @@ function drawCar(g,i,x,y,t,spd){
  if(b){
   if(!fs){g.fillStyle='rgba(255,255,255,.75)';for(var k=0;k<3;k++){var lx=x-6-Math.floor((t*.22+k*23+i*11)%44);g.fillRect(lx,y+3+k*5,6+k*2,1)}}
   /* 50 — обычное пламя; 150 — в 1,5 раза длиннее; 500 — как 150, но синее */
-  var fp=fs?50:flameP[i],k1=fp>=150?1.5:1,blue=fp>=500,n=Math.round(((Math.floor(t/50)+i)&1?8:5)*k1),o=function(v){return Math.round(v*k1)};
+  var fp=fs?50:flameP[i],k1=fp>=150?3:1,blue=fp>=500,n=Math.round(((Math.floor(t/50)+i)&1?8:5)*k1),o=function(v){return Math.round(v*k1)};
   g.fillStyle=blue?'#1d3fd6':'#e8321c';g.fillRect(x-n,y+9,n+1,1);g.fillRect(x-n+o(2),y+8,n-o(2)+1,3);
   g.fillStyle=blue?'#3fa9ff':'#ff9a1a';g.fillRect(x-n+o(3),y+8,n-o(3)+1,3);
   g.fillStyle=blue?'#c8f4ff':'#ffe25a';g.fillRect(x-n+o(5),y+9,Math.max(1,n-o(5)+1),1);g.fillStyle='#fff';g.fillRect(x,y+9,1,1);
