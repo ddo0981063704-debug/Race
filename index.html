@@ -125,7 +125,11 @@ html.app #fsb{display:none}
 .sctl{gap:6px}.sctl input{flex:1 1 100%!important}.sctl button{flex:1 1 40%;margin:2px}
 .prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed #283273}.pname{font-size:9px}
 #fov,#lov,#tiov{z-index:30}
-.ttl{flex:none;text-align:center;font-size:22px;line-height:1;padding:2px 0 0;color:var(--gold);text-shadow:3px 3px 0 #c0392b,5px 5px 0 #000;letter-spacing:4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
+.stand{flex:none;position:relative;height:clamp(78px,12vh,120px);overflow:hidden;background:#1d2858;padding:0}
+#scv{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.banner{position:absolute;left:50%;top:8%;transform:translateX(-50%);max-width:84%;background:#f6f3e8;border:3px solid #000;box-shadow:inset 0 0 0 3px #d42640,inset 0 -6px 0 3px #e6e0cc,4px 4px 0 rgba(0,0,0,.45);padding:7px 16px 8px;animation:sway 1.1s steps(1) infinite;cursor:pointer}
+@keyframes sway{50%{transform:translate(-50%,2px)}}
+.ttl{flex:none;text-align:center;font-size:clamp(16px,6vw,28px);line-height:1;padding:0;color:#d42640;text-shadow:2px 2px 0 #000;letter-spacing:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
 #tiov{z-index:20}
 .led{width:8px;height:8px;background:#555;box-shadow:0 0 0 1px #000;display:inline-block}
 .led.on{background:#3cff6a}.led.wait{background:#ffd23f;animation:blink .6s steps(1) infinite}.led.err{background:#ff3b3b}
@@ -157,7 +161,7 @@ html.app #fsb{display:none}
 
 <div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas><div id="ovl"></div></div>
 
-<div class="ttl" id="ttl" title="Нажмите, чтобы изменить надпись">RACE</div>
+<div class="stand pxf" id="stand"><canvas id="scv" width="10" height="10"></canvas><div class="banner" id="bnr"><div class="ttl" id="ttl" title="Нажмите, чтобы изменить надпись">RACE</div></div></div>
 
 <div class="grid">
   <div class="card pxf">
@@ -618,7 +622,31 @@ function drawProgress(g,t){
  else{hide(PI.lead);g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
 }
 var dispF=[0,0,0,0,0],superB=[0,0,0,0,0],flameP=[50,50,50,50,50];
+/* трибуна с болельщиками под трассой; плакат с надписью держат двое */
+var ST2={frames:[],w:0,h:0,poles:null};
+function buildStand2(){var c=document.getElementById('scv'),box=document.getElementById('stand'),bn=document.getElementById('bnr');if(!c||!box)return;
+ var cw=box.clientWidth,ch=box.clientHeight;if(cw<20||ch<20)return;var P=3,w=Math.ceil(cw/P),h=Math.ceil(ch/P);c.width=w;c.height=h;ST2.w=w;ST2.h=h;
+ var br=bn.getBoundingClientRect(),sr=box.getBoundingClientRect(),bl=Math.round((br.left-sr.left)/P),brr=Math.round((br.right-sr.left)/P),bb=Math.round((br.bottom-sr.top)/P);
+ ST2.poles=[bl+3,brr-4,bb];
+ var sd=987,Rn=function(){sd=(sd*16807)%2147483647;return sd/2147483647},ppl=[],rows=Math.ceil(h/6)+1;
+ for(var r=0;r<rows;r++)for(var x=(r%2)*2+1;x<w;x+=4){if(Rn()<.05)continue;ppl.push({x:x,y:r*6+1,s:SHIRTS[Math.floor(Rn()*SHIRTS.length)],k:SKIN[Math.floor(Rn()*SKIN.length)],h:HAIR[Math.floor(Rn()*HAIR.length)],fl:Rn()<.08?CARS[Math.floor(Rn()*5)].c:null,p:[Rn(),Rn(),Rn(),Rn()]})}
+ ST2.frames=[];
+ for(var f=0;f<4;f++){var q=px(w,h),g=q.getContext('2d');
+  for(r=0;r<rows;r++){var y=r*6;g.fillStyle=r%2?'#2a3474':'#243066';g.fillRect(0,y,w,5);g.fillStyle='#4b5596';g.fillRect(0,y+5,w,1);for(x=(r%2)*2;x<w;x+=4){g.fillStyle=r%2?'#33408a':'#2d3a80';g.fillRect(x,y+3,2,2)}}
+  ppl.forEach(function(p){var v=p.p[f],near=Math.abs(p.x-ST2.poles[0])<3||Math.abs(p.x-ST2.poles[1])<3,up=near||v<.25,jp=v>.85?-1:0,x=p.x,y=p.y+jp;
+   g.fillStyle=p.h;g.fillRect(x,y,2,1);g.fillStyle=p.k;g.fillRect(x,y+1,2,1);g.fillStyle=p.s;g.fillRect(x,y+2,2,3);
+   if(up){g.fillRect(x-1,y,1,2);g.fillRect(x+2,y,1,2);g.fillStyle=p.k;g.fillRect(x-1,y-1,1,1);g.fillRect(x+2,y-1,1,1)}
+   if(p.fl&&!near){g.fillStyle='#dddddd';g.fillRect(x+2,y-3,1,5);g.fillStyle=p.fl;g.fillRect(x+3,y-3+(f&1),2,2)}});
+  /* шесты плаката и руки, которые их держат */
+  ST2.poles.slice(0,2).forEach(function(px0,k){g.fillStyle='#000';g.fillRect(px0-1,ST2.poles[2]-2,3,h);g.fillStyle='#b07a3c';g.fillRect(px0,ST2.poles[2]-2,1,h);
+   var hy=ST2.poles[2]+3+(f&1);g.fillStyle=SKIN[k];g.fillRect(px0-1,hy,3,1);g.fillRect(px0-1,hy+4,3,1)});
+  g.fillStyle='#c9cfdd';g.fillRect(0,h-2,w,1);g.fillStyle='#0b0c12';g.fillRect(0,h-1,w,1);
+  ST2.frames.push(q)}
+}
+function drawStand2(t){var c=document.getElementById('scv');if(!ST2.frames.length||!c)return;var g=c.getContext('2d');g.drawImage(ST2.frames[Math.floor(cft)%4],0,0);
+ if(Math.random()<.05+hype*.8){var x=Math.floor(Math.random()*ST2.w),y=Math.floor(Math.random()*ST2.h);g.fillStyle='#fff';g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3)}}
 function fxStep(t,dt){
+ drawStand2(t);
  for(var sb=0;sb<5;sb++)if(superB[sb]>0)superB[sb]=fs?0:superB[sb]-dt;
  for(var di=0;di<5;di++){var dd=pts[di]-dispF[di];if(dd>0){dispF[di]=Math.min(pts[di],dispF[di]+Math.max(dd*Math.min(1,dt*3.2),dt*120));}disp[di]=Math.floor(dispF[di])}
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
@@ -860,6 +888,7 @@ function inClaude(){return /claude\.ai|claudeusercontent|anthropic/i.test(locati
 function ttInit(){ttLoad();ttBuildMap();
  if(inClaude())document.getElementById('twarn').style.display='block';
  document.getElementById('setb').onclick=function(){document.getElementById('tov').classList.add('show')};
+ if(window.ResizeObserver)new ResizeObserver(function(){buildStand2()}).observe(document.getElementById('stand'));window.addEventListener('resize',function(){setTimeout(buildStand2,60)});setTimeout(buildStand2,80);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){setTimeout(buildStand2,50)});
  document.getElementById('tx').onclick=function(){document.getElementById('tclose').onclick()};
  document.getElementById('tclose').onclick=function(){TT.learn=null;ttLearnUI();document.getElementById('tov').classList.remove('show')};
  document.getElementById('tcon').onclick=function(){if(TT.want)ttStop();else ttConnect()};
@@ -939,9 +968,10 @@ document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(doc
 /* надпись между трассой и кнопками (по умолчанию RACE, меняется нажатием) */
 var TITLE='RACE';
 (function(){var el=document.getElementById('ttl'),o=document.getElementById('tiov'),n=document.getElementById('tiin');
- function set(v,save){TITLE=String(v==null?'':v).trim().slice(0,24)||'RACE';el.textContent=TITLE;if(save){try{localStorage.setItem('raceTitle',TITLE)}catch(e){}}}
+ function set(v,save){TITLE=String(v==null?'':v).trim().slice(0,24)||'RACE';el.textContent=TITLE;setTimeout(buildStand2,30);if(save){try{localStorage.setItem('raceTitle',TITLE)}catch(e){}}}
  try{var v=localStorage.getItem('raceTitle');if(v)set(v,false)}catch(e){}
- el.onclick=function(){n.value=TITLE;o.classList.add('show');setTimeout(function(){n.focus();n.select()},50)};
+ document.getElementById('bnr').onclick=function(){el.onclick()};
+ el.onclick=function(e){if(e)e.stopPropagation();n.value=TITLE;o.classList.add('show');setTimeout(function(){n.focus();n.select()},50)};
  document.getElementById('tiok').onclick=function(){set(n.value,true);o.classList.remove('show')};
  document.getElementById('tidef').onclick=function(){set('RACE',true);o.classList.remove('show')};
  document.getElementById('tican').onclick=function(){o.classList.remove('show')};
