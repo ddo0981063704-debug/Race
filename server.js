@@ -18,7 +18,8 @@ const EV = {
 };
 const PORT = process.env.PORT || 3000;
 const GAME = path.join(__dirname, 'index.html');
-const rooms = new Map(); // ник → { clients, conn, state, retry, stop }
+const rooms = new Map();
+const cool = new Map(), fails = new Map(), block = new Map(); // время последней попытки и число неудач подряд (по нику) // ник → { clients, conn, state, retry, stop }
 
 function send(res, obj) { try { res.write('data: ' + JSON.stringify(obj) + '\n\n'); } catch (e) {} }
 function broadcast(room, obj) { for (const r of room.clients) send(r, obj); }
@@ -55,14 +56,25 @@ function connect(room) {
   conn.on(EV.DISC, () => { if (room.conn === conn) retryLater(room, 'связь с эфиром потеряна — переподключаюсь…', 10000); });
   conn.on(EV.ERR, (e) => console.error('[@' + room.nick + '] ошибка:', e && (e.message || e)));
 
+  cool.set(room.nick, Date.now());
   conn.connect().then(() => {
-    if (room.conn === conn) status(room, 'on', '✔ подключено к эфиру @' + room.nick);
+    if (room.conn !== conn) return;
+    fails.set(room.nick, 0);
+    status(room, 'on', '✔ подключено к эфиру @' + room.nick);
   }).catch((err) => {
     if (room.conn !== conn) return;
     const m = String((err && (err.message || err.info)) || err);
+    const n = (fails.get(room.nick) || 0) + 1; fails.set(room.nick, n);
+    if (/rate.?limit|too many/i.test(m)) {
+      // дневной лимит сервиса подписи: не тратим попытки, ждём долго
+      block.set(room.nick, Date.now() + 30 * 60000);
+      return retryLater(room, '⚠ лимит подключений на сегодня исчерпан (Rate Limited). Повторю через 30 мин. ' +
+        (process.env.SIGN_API_KEY ? '' : 'Совет: добавьте свой бесплатный ключ SIGN_API_KEY.'), 30 * 60000);
+    }
     const offline = /offline|not.{0,10}live|isn.?t online|ended|room ?id/i.test(m);
-    retryLater(room, offline ? '@' + room.nick + ' сейчас не в эфире — жду начала эфира…'
-                             : 'не удалось подключиться: ' + m.slice(0, 160), 30000);
+    const wait = Math.min(5 * 60000, 60000 * Math.pow(2, Math.min(n - 1, 3))); // 1, 2, 4, 5 мин
+    retryLater(room, (offline ? '@' + room.nick + ' сейчас не в эфире — жду начала эфира'
+                              : 'не удалось подключиться: ' + m.slice(0, 140)) + ' (повтор через ' + Math.round(wait / 60000) + ' мин)', wait);
   });
 }
 
@@ -71,7 +83,7 @@ function retryLater(room, msg, ms) {
   try { c && c.disconnect && c.disconnect(); } catch (e) {}
   status(room, 'wait', msg);
   clearTimeout(room.retry);
-  if (room.clients.size) room.retry = setTimeout(() => connect(room), ms);
+  if (room.clients.size) room.retry = setTimeout(() => { room.retry = null; if (room.clients.size) connect(room); }, ms);
 }
 
 function join(nick, res) {
@@ -80,8 +92,15 @@ function join(nick, res) {
   clearTimeout(room.stop);
   room.clients.add(res);
   if (room.state) send(res, room.state);
-  if (!room.conn && !room.retry) connect(room);
-  else if (!room.conn) { clearTimeout(room.retry); connect(room); }
+  // не подключаемся чаще, чем разрешает пауза (иначе быстро кончается дневной лимит)
+  if (!room.conn && !room.retry) {
+    const last = cool.get(nick) || 0, n = fails.get(nick) || 0;
+    const gap = n ? Math.min(5 * 60000, 60000 * Math.pow(2, Math.min(n - 1, 3))) : 15000;
+    const left = Math.max(last + gap, block.get(nick) || 0) - Date.now();
+    if (left > 0) { room.retry = setTimeout(() => { room.retry = null; if (room.clients.size && !room.conn) connect(room); }, left);
+      if (!room.state) status(room, 'wait', 'жду ' + Math.ceil(left / 1000) + ' с перед новой попыткой…'); }
+    else connect(room);
+  }
   return room;
 }
 
