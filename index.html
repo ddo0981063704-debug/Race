@@ -110,6 +110,7 @@ td.r,th.r{text-align:right}
 @keyframes glow{50%{background:#5a4500}}
 @keyframes pulse{50%{--b:#ef3a55}}
 .hr{display:flex;align-items:center;gap:8px}
+#mub{font-size:12px;padding:4px 8px;min-height:28px;margin:0;--b:#18a058;--l:#5fe39a;--d:#0b5a30}#mub.off{--b:#111;--l:#444;--d:#000;color:#777;text-decoration:line-through}
 #fsb{font-size:12px;padding:4px 8px;min-height:28px;margin:0;--b:#111;--l:#444;--d:#000}
 html.app #fsb{display:none}
 #ttb{font-size:8px;padding:6px 8px;min-height:28px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;gap:6px;margin:0}
@@ -140,7 +141,7 @@ html.app #fsb{display:none}
 </style>
 </head>
 <body>
-<h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="fsb" title="Во весь экран">⛶</button><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
+<h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="mub" title="Музыка вкл/выкл">♪</button><button id="fsb" title="Во весь экран">⛶</button><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
 
 <div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas><div id="ovl"></div></div>
 
@@ -451,7 +452,7 @@ function nickCanvas(u){var n=String(u||'').trim();if(n.length>16)n=n.slice(0,15)
  var l=labelCanvas(n,'#ffffff'),c=px(l.width+3,l.height+2),q=c.getContext('2d');q.fillStyle='rgba(0,0,0,.6)';q.fillRect(0,0,c.width,c.height);q.drawImage(l,1,1);return c}
 function fx(car,points,label,user){var e=label?String(label).split(' ')[0]:'',gj=-1;GIFTS[car].forEach(function(x,j){if(x.n===label)gj=j});
  var ic=(gj>-1&&GIMG_C[car][gj])?GIMG_C[car][gj]:(e?emoCanvas(e):null);
- pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
+ sfxGift(points);pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function pixCircle(g,x,y,d,col){var r=d/2;g.fillStyle=col;for(var yy=0;yy<d;yy++){var dy=yy+.5-r,w=Math.round(Math.sqrt(Math.max(0,r*r-dy*dy))*2);if(w>0)g.fillRect(x+((d-w)>>1),y+yy,w,1)}}
 function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
@@ -634,7 +635,7 @@ function build(){
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function start(){
   pts=CARS.map(function(){return 0});shown=pts.slice();boost=pts.slice();donors={};over=false;fs=null;
-  pops=[];hype=0;winCar=-1;progF=0;slotY=[0,1,2,3,4];slotT=[0,1,2,3,4];
+  pops=[];hype=0;winCar=-1;progF=0;if(typeof AU!=='undefined')AU.mode='race';slotY=[0,1,2,3,4];slotT=[0,1,2,3,4];
   document.getElementById('feed').innerHTML='';
   document.getElementById('ov').classList.remove('show');
   render();
@@ -687,7 +688,7 @@ function finish(w){
   document.getElementById('t2').innerHTML=list.map(function(x,k){
     return '<tr><td>'+(k+1)+'</td><td>'+esc(x.n)+'</td><td>'+dotH(x.c)+''+(x.c+1)+'</td><td class="r">'+x.p.toLocaleString('ru-RU')+'</td></tr>';
   }).join('');
-  showWin(w);
+  showWin(w);sfxWin();
   document.getElementById('ov').classList.add('show');
 }
 
@@ -815,6 +816,49 @@ function ttInit(){ttLoad();ttBuildMap();
    if(j&&j.race){TT.srv=true;document.getElementById('tsrv').style.display='block';document.getElementById('tkeyw').style.display='none'}auto()}).catch(auto)}
  else auto();
 }
+/* ================= МУЗЫКА =================
+   Своя чиптюн-мелодия, генерируется прямо в браузере (Web Audio) — без файлов и без авторских прав. */
+var AU={ctx:null,on:true,master:null,timer:null,step:0,next:0,pw:null,nz:null,mode:'race',lastSfx:0};
+try{AU.on=localStorage.getItem('raceMusic')!=='0'}catch(e){}
+var BPM=152,S16=60/BPM/4;
+var LEAD=[76,76,81,-1,79,76,74,76, 72,-1,69,72,77,-1,76,72, 79,-1,76,79,84,-1,83,79, 86,-1,83,79,74,-1,79,83,
+          81,-1,81,84,81,-1,79,77, 79,-1,83,86,83,-1,81,79, 76,79,83,88,86,83,79,76, 81,-1,-1,-1,76,-1,69,-1];
+var ROOT=[45,41,48,43,41,43,40,45],CH=[[57,60,64],[53,57,60],[55,60,64],[55,59,62],[53,57,60],[55,59,62],[52,55,59],[57,60,64]];
+function mf(m){return 440*Math.pow(2,(m-69)/12)}
+function auInit(){if(AU.ctx)return true;var C=window.AudioContext||window.webkitAudioContext;if(!C)return false;
+ try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+ var c=AU.ctx=new C();AU.master=c.createGain();AU.master.gain.value=.5;var comp=c.createDynamicsCompressor();AU.master.connect(comp);comp.connect(c.destination);
+ var n=32,re=new Float32Array(n),im=new Float32Array(n);for(var k=1;k<n;k++)im[k]=2/(k*Math.PI)*Math.sin(k*Math.PI*.25);AU.pw=c.createPeriodicWave(re,im);
+ var b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;AU.nz=b;return true}
+function tone(f,t,dur,vol,wave,slide){var c=AU.ctx,o=c.createOscillator(),g=c.createGain();
+ if(wave==='pulse')o.setPeriodicWave(AU.pw);else o.type=wave;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.006);g.gain.setValueAtTime(vol,t+Math.max(.01,dur-.03));g.gain.linearRampToValueAtTime(0,t+dur);
+ o.connect(g);g.connect(AU.master);o.start(t);o.stop(t+dur+.02)}
+function noise(t,dur,vol,ftype,freq){var c=AU.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=AU.nz;f.type=ftype;f.frequency.value=freq;
+ g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(AU.master);s.start(t,Math.random()*.5);s.stop(t+dur+.02)}
+function playStep(st,t){var bar=(st>>4)&7,s16=st&15;
+ if((s16&1)===0){var li=bar*8+(s16>>1),m=LEAD[li];if(m>0){var h=1;while(li+h<LEAD.length&&LEAD[li+h]===-1&&((li+h)>>3)===(li>>3))h++;tone(mf(m),t,S16*2*h-.01,.11,'square')}}
+ if((s16&1)===0){var bm=ROOT[bar]+((s16>>1)&1?12:0);tone(mf(bm),t,S16*1.8,.16,'triangle')}
+ var ch=CH[bar];tone(mf(ch[s16%3]+12),t,S16*.9,.035,'pulse');
+ if(s16===0||s16===8||s16===10&&bar%2)tone(150,t,.12,.5,'sine',40);
+ if(s16===4||s16===12)noise(t,.14,.35,'bandpass',1800);
+ if((s16&1)===0)noise(t,.035,.12,'highpass',7000)}
+function sched(){var c=AU.ctx;if(!c)return;while(AU.next<c.currentTime+.15){if(AU.mode==='race')playStep(AU.step,AU.next);AU.next+=S16;AU.step=(AU.step+1)%128}}
+function musicStart(){if(!AU.on||!auInit())return;var c=AU.ctx;if(c.state!=='running')c.resume();AU.mode='race';
+ if(!AU.timer){AU.step=0;AU.next=c.currentTime+.08;AU.timer=setInterval(sched,25)}}
+function musicStop(){clearInterval(AU.timer);AU.timer=null}
+function sfxGift(p){if(!AU.on||!AU.ctx||AU.ctx.state!=='running')return;var c=AU.ctx,t=c.currentTime;if(t-AU.lastSfx<.06)return;AU.lastSfx=t;
+ var base=p>=1500?84:p>=500?79:p>=150?76:72;tone(mf(base),t,.06,.09,'pulse');tone(mf(base+7),t+.06,.08,.09,'pulse');if(p>=1500){tone(mf(base+12),t+.14,.16,.1,'pulse');noise(t,.3,.15,'highpass',4000)}}
+function sfxWin(){if(!AU.on||!AU.ctx)return;AU.mode='win';var c=AU.ctx,t=c.currentTime+.05;
+ [[72,0],[76,1],[79,2],[84,3],[79,4],[84,5],[88,6]].forEach(function(n){tone(mf(n[0]),t+n[1]*.12,n[1]===6?.9:.11,.12,'square');tone(mf(n[0]-12),t+n[1]*.12,n[1]===6?.9:.11,.1,'triangle')});
+ noise(t+.72,.6,.2,'highpass',5000)}
+function musicUI(){var b=document.getElementById('mub');b.classList.toggle('off',!AU.on);b.textContent=AU.on?'♪':'♪'}
+document.getElementById('mub').onclick=function(e){e.stopPropagation();AU.on=!AU.on;try{localStorage.setItem('raceMusic',AU.on?'1':'0')}catch(x){}musicUI();
+ if(AU.on){musicStart();if(over)AU.mode='win'}else{musicStop();if(AU.ctx)AU.ctx.suspend()}};
+musicUI();
+['pointerdown','touchend','keydown'].forEach(function(ev){document.addEventListener(ev,function(){if(AU.on&&!AU.timer)musicStart();else if(AU.on&&AU.ctx&&AU.ctx.state!=='running')AU.ctx.resume()},{passive:true})});
+document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(AU.on)AU.ctx.resume()});
+
 /* полноэкранный режим */
 var isApp=(window.navigator.standalone===true)||(window.matchMedia&&(matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches));
 if(isApp)document.documentElement.classList.add('app');
