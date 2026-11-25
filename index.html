@@ -73,8 +73,8 @@ body.editimg #gifts button:not(.tb){outline:2px dashed var(--gold);outline-offse
 #ovl img{position:absolute;display:none;object-fit:cover;image-rendering:auto}
 #ovl img.hd{border-radius:50%}
 #ovl b{position:absolute;display:none;color:#fff;font-weight:400;text-align:center;box-shadow:0 0 0 1px #000;text-shadow:1px 1px 0 #000;line-height:1}
-#gifts .tb{flex:none;width:38px;min-height:38px;height:38px;padding:0;font-size:9px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
-#gifts .tb.has{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
+#sppl .tb{flex:none;width:38px;min-height:38px;height:38px;padding:0;font-size:9px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
+#sppl .tb.has{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
 #lov{z-index:20}.lbox{max-width:420px;text-align:left}
 #lin,#tiin{width:100%;font:inherit;font-size:10px;color:#7dff8a;background:#000;border:2px solid #fff;padding:10px 8px;margin:4px 0 12px}
 .lrow{justify-content:flex-end;gap:6px;flex-wrap:wrap}#lclr{--b:#9c1f33;--l:#e2546a;--d:#4f0c18}#lok{--b:#18a058;--l:#5fe39a;--d:#0b5a30}
@@ -118,7 +118,13 @@ td.r,th.r{text-align:right}
 #fsb{font-size:9px;padding:7px 9px;min-height:34px;margin:2px;flex:1 1 0;--b:#111;--l:#444;--d:#000}
 html.app #fsb{display:none}
 #ttb{font-size:9px;padding:7px 9px;min-height:34px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;justify-content:center;gap:6px;margin:2px;flex:1 1 0}
-.ctl2{margin-top:6px}
+.frow{gap:6px;margin-top:7px;align-items:stretch}.frow .feed{flex:1 1 auto;min-width:0;margin-top:0}
+#setb{flex:none;margin:0;min-height:30px;padding:4px 10px;font-size:14px;display:flex;align-items:center;gap:6px;--b:#2d3780;--l:#5463c8;--d:#161b4a}
+#imgdone{display:none;flex:none;margin:0;min-height:30px;font-size:9px;--b:#b8761a;--l:#ffc451;--d:#5e3a08}body.editimg #imgdone{display:block}
+#gifts .row{border-left:6px solid #555;padding-left:6px}
+.sctl{gap:6px}.sctl input{flex:1 1 100%!important}.sctl button{flex:1 1 40%;margin:2px}
+.prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed #283273}.pname{font-size:9px}
+#fov,#lov,#tiov{z-index:30}
 .ttl{flex:none;text-align:center;font-size:22px;line-height:1;padding:2px 0 0;color:var(--gold);text-shadow:3px 3px 0 #c0392b,5px 5px 0 #000;letter-spacing:4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
 #tiov{z-index:20}
 .led{width:8px;height:8px;background:#555;box-shadow:0 0 0 1px #000;display:inline-block}
@@ -156,23 +162,27 @@ html.app #fsb{display:none}
 <div class="grid">
   <div class="card pxf">
     <div id="gifts"></div>
-    <div class="row ctl">
-      <input id="nick" placeholder="Ник зрителя">
-      <button id="auto">▶ Авто-зрители</button>
-      <button id="imgm" title="Поставить свои картинки на кнопки подарков">🖼 Картинки</button>
-      <button id="reset">↺ Заново</button>
-    </div>
-    <div class="row ctl ctl2">
-      <button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button>
-      <button id="mub" title="Музыка вкл/выкл">♪ Музыка</button>
-      <button id="fsb" title="Во весь экран">⛶ Экран</button>
-    </div>
-    <div class="feed" id="feed"></div>
+    <div class="row frow"><div class="feed" id="feed"></div><button id="imgdone">✔ Готово</button><button id="setb" title="Настройки"><i class="led" id="led"></i>⚙</button></div>
     <input type="file" id="logofile" accept="image/*" hidden>
   </div>
 </div>
 
 <div class="ov" id="tov"><div class="box pxf tbox">
+  <button id="tx" title="Закрыть" style="position:sticky;top:0;float:right;margin:0;z-index:2;--b:#9c1f33;--l:#e2546a;--d:#4f0c18">✕</button>
+  <div class="wbig" style="font-size:16px;margin:2px 0 6px;animation:none">⚙ НАСТРОЙКИ</div>
+  <h3>🎮 Управление</h3>
+  <div class="row trow sctl">
+    <input id="nick" placeholder="Ник зрителя (для тест-кнопок)">
+    <button id="auto">▶ Авто-зрители</button>
+    <button id="reset">↺ Заново</button>
+    <button id="mub" title="Музыка вкл/выкл">♪ Музыка</button>
+    <button id="fsb" title="Во весь экран">⛶ Экран</button>
+  </div>
+  <h3>👤 Участники: фото и текст</h3>
+  <p class="hint">Квадрат — фото участника (долгое нажатие — убрать фото). «Aa» — текст над очками.</p>
+  <div id="sppl"></div>
+  <h3>🖼 Картинки на кнопках подарков</h3>
+  <div class="row trow"><button id="imgm" title="Поставить свои картинки на кнопки подарков">🖼 Выбрать картинки</button></div>
   <h3>📡 Подключение к TikTok LIVE</h3>
   <div class="warn" id="twarn">Внутри Claude подключение к TikTok заблокировано. Откройте эту игру с вашего сайта (см. инструкцию), там всё заработает.</div>
   <label>Ваш ник в TikTok (без @)</label>
@@ -268,7 +278,7 @@ function labelCanvas(str,col){var f='bold 8px Verdana,Tahoma,Arial,sans-serif',m
  g.putImageData(id,0,0);return c}
 function toHex(c){return c.charAt(0)==='#'?c:'#'+c.match(/\d+/g).slice(0,3).map(function(v){return(+v).toString(16).padStart(2,'0')}).join('')}
 function buildLabels(){for(var i=0;i<5;i++)LBL_C[i]=LABELS[i]?labelCanvas(LABELS[i],toHex(mix(CARS[i].c,'#ffffff',.55))):null}
-function setLabel(i,v,save){LABELS[i]=String(v||'').trim().slice(0,30);buildLabels();var b=document.querySelector('#gifts .tb[data-i="'+i+'"]');if(b)b.classList.toggle('has',!!LABELS[i]);
+function setLabel(i,v,save){LABELS[i]=String(v||'').trim().slice(0,30);buildLabels();var b=document.querySelector('.tb[data-i="'+i+'"]');if(b)b.classList.toggle('has',!!LABELS[i]);
  if(save){try{localStorage.setItem('raceLabels',JSON.stringify(LABELS))}catch(e){}}}
 function loadLabels(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLabels')||'null')}catch(e){}for(var i=0;i<5;i++)setLabel(i,(a&&a[i]!=null&&a[i]!=='')?a[i]:LABELS[i],false)}
 var lblI=0;
@@ -286,7 +296,7 @@ function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGO_B[i]=null;LOGOS[i]='';
 function saveLogos(){try{localStorage.setItem('raceLogos',JSON.stringify(LOGOS))}catch(e){}}
 function loadLogos(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLogos')||'null')}catch(e){}
  for(var i=0;i<5;i++){var v=(a&&a[i])||LOGOS[i];if(v)setLogo(i,v,false)}}
-function logoUI(i){PI_src(i);var b=document.querySelector('#gifts .num[data-i="'+i+'"]');if(!b)return;
+function logoUI(i){PI_src(i);var b=document.querySelector('#sppl .num[data-i="'+i+'"]');if(!b)return;
  b.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);b.classList.toggle('has',!!LOGOS[i]);
  b.title=LOGOS[i]?'Сменить фото (долгое нажатие — убрать)':'Нажмите, чтобы поставить фото'}
 function pickLogo(i){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
@@ -644,11 +654,12 @@ function build(){
   var g=document.getElementById('gifts');
   g.innerHTML='';
   CARS.forEach(function(o,i){
-    var d=document.createElement('div');d.className='row';
-    d.innerHTML='<span class="num" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>';
+    var d=document.createElement('div');d.className='row';d.style.borderLeftColor=o.c;
+    var pr=document.createElement('div');pr.className='prow';
+    pr.innerHTML='<span class="num" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>';
     var tb=document.createElement('button');tb.className='tb';tb.setAttribute('data-i',i);tb.textContent='Aa';tb.title='Текст над очками';tb.onclick=function(){openLabel(i)};
-    d.appendChild(tb);
-    var nb=d.firstChild,ht=null,lp=false;
+    pr.appendChild(tb);pr.insertAdjacentHTML('beforeend','<span class="pname" style="color:'+o.c+'">'+o.name+'</span>');document.getElementById('sppl').appendChild(pr);
+    var nb=pr.firstChild,ht=null,lp=false;
     nb.onclick=function(){if(lp){lp=false;return}pickLogo(i)};
     nb.onpointerdown=function(){lp=false;ht=setTimeout(function(){if(LOGOS[i]){lp=true;setLogo(i,'',true)}},700)};
     nb.onpointerup=nb.onpointerleave=function(){clearTimeout(ht)};
@@ -667,8 +678,9 @@ function build(){
     g.appendChild(d);
   });
   loadLogos();loadLabels();loadGiftImgs();
-  document.getElementById('imgm').onclick=function(){var on=document.body.classList.toggle('editimg');this.classList.toggle('on',on);this.textContent=on?'✔ Готово':'🖼 Картинки';
-   if(on){var f=document.getElementById('feed');f.insertAdjacentHTML('afterbegin','<div>🖼 Нажмите на подарок, чтобы выбрать картинку. × — вернуть как было</div>')}};
+  document.getElementById('imgm').onclick=function(){document.body.classList.add('editimg');document.getElementById('tov').classList.remove('show');
+   var f=document.getElementById('feed');f.insertAdjacentHTML('afterbegin','<div>🖼 Нажмите на подарок → выберите картинку. × — вернуть. Потом «Готово»</div>')};
+  document.getElementById('imgdone').onclick=function(){document.body.classList.remove('editimg')};
   document.getElementById('lok').onclick=function(){setLabel(lblI,document.getElementById('lin').value,true);closeLabel()};
   document.getElementById('lclr').onclick=function(){setLabel(lblI,'',true);closeLabel()};
   document.getElementById('lcan').onclick=closeLabel;
@@ -847,7 +859,8 @@ function ttBtn(){var b=document.getElementById('tcon');b.textContent=TT.want?'�
 function inClaude(){return /claude\.ai|claudeusercontent|anthropic/i.test(location.hostname)}
 function ttInit(){ttLoad();ttBuildMap();
  if(inClaude())document.getElementById('twarn').style.display='block';
- document.getElementById('ttb').onclick=function(){document.getElementById('tov').classList.add('show')};
+ document.getElementById('setb').onclick=function(){document.getElementById('tov').classList.add('show')};
+ document.getElementById('tx').onclick=function(){document.getElementById('tclose').onclick()};
  document.getElementById('tclose').onclick=function(){TT.learn=null;ttLearnUI();document.getElementById('tov').classList.remove('show')};
  document.getElementById('tcon').onclick=function(){if(TT.want)ttStop();else ttConnect()};
  document.getElementById('ttestb').onclick=function(){var n=document.getElementById('ttest').value.trim();if(!n)return;
