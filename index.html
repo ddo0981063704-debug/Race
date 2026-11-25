@@ -511,8 +511,9 @@ function drawCar(g,i,x,y,t){if(!CBUF)CBUF=px(150,34);var q=CBUF.getContext('2d')
  g.drawImage(CBUF,0,0,150,34,x-Math.round(CBX*CK),ys-Math.round(CBY*CK),Math.round(150*CK),Math.round(34*CK))}
 function CM(x,y,px1,py1){return[x+Math.round(px1*CK),y+19-Math.round(19*CK)+Math.round(py1*CK)]}
 function drawCarRaw(g,i,x,y,t,spd){
- var b=boost[i]>0,wf=Math.floor(laneOff[i]/5)%NWF;
- if(b&&!fs&&(Math.floor(t/60)&1))y-=1;
+ var b=boost[i]>0,wf=Math.floor(laneOff[i]/9)%NWF;
+ if((b&&!fs&&(Math.floor(t/60)&1))||(!b&&((Math.floor(t/90)+i*3)%7===0)))y-=1;
+ if(!fs){g.fillStyle='rgba(255,255,255,.28)';for(var w2=0;w2<2;w2++){var wx=x-8-Math.floor((t*.35+w2*41+i*17)%60);g.fillRect(wx,y+4+w2*7,5+w2*3,1)}}
  g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+3,y+17,44,2);
  if(b){
   if(!fs){g.fillStyle='rgba(255,255,255,.75)';for(var k=0;k<3;k++){var lx=x-6-Math.floor((t*.22+k*23+i*11)%44);g.fillRect(lx,y+3+k*5,6+k*2,1)}}
@@ -664,7 +665,7 @@ function fxStep(t,dt){
  for(var di=0;di<5;di++){var dd=pts[di]-dispF[di];if(dd>0){dispF[di]=Math.min(pts[di],dispF[di]+Math.max(dd*Math.min(1,dt*3.2),dt*120));}disp[di]=Math.floor(dispF[di])}
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
  hype=Math.max(0,hype-dt*.22);cft+=dt*(2.2+hype*9);
- var nb=0;for(var i=0;i<5;i++)if(boost[i]>0&&!fs)nb++;gOff+=(60+nb*25)*dt;
+ var nb=0;for(var i=0;i<5;i++)if(boost[i]>0&&!fs)nb++;gOff+=(200+nb*40)*dt;
  for(i=0;i<pops.length;i++)pops[i].t+=dt;pops=pops.filter(function(p){return p.t<1.2});
  CLOUDS.forEach(function(c){c.x-=c.v*dt;if(c.x<-c.w-4)c.x=GW+4});
  if(winCar>=0&&document.getElementById('ov').classList.contains('show'))drawWin(t,dt);
@@ -811,7 +812,7 @@ function loop(t){
     var pct=shown[i]/GOAL*100;
     var sway=6+Math.sin(t/350+i*1.7)*5+Math.sin(t/910+i)*3;
     carX[i]=fs?(fs.x[i]+sway*.35):(pct*KM+sway*.35);
-    var lsp=((superB[i]>0&&!fs)?260:(boost[i]>0&&!fs)?150:60)*dt;laneOff[i]+=lsp;physOff[slotT[i]]+=lsp;
+    var lsp=((superB[i]>0&&!fs)?520:(boost[i]>0&&!fs)?340:200)*dt;laneOff[i]+=lsp;physOff[slotT[i]]+=lsp;
   });
   var rk=ranking();for(var q=0;q<5;q++)slotT[rk[q]]=q;
   for(q=0;q<5;q++){slotY[q]+=(slotT[q]-slotY[q])*Math.min(1,dt*5);if(Math.abs(slotT[q]-slotY[q])<.02)slotY[q]=slotT[q]}
