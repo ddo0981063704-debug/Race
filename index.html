@@ -503,7 +503,7 @@ function draw(t){PI_init();
    if(lc.width<=aw)g.drawImage(lc,GW-1-lc.width,y0);
    else{var per=lc.width+14,off=Math.floor((t*.025)%per);g.save();g.beginPath();g.rect(ax,y0,aw,lc.height);g.clip();g.drawImage(lc,ax-off,y0);g.drawImage(lc,ax-off+per,y0);g.restore()}}
   else{sy=ly+(L>>1)-5;byy=ly+(L>>1)+3}
-  txt(g,s,GW-2-tw(s),sy,mix(c,'#ffffff',.25));
+  var cnt=disp[i]<pts[i];txt(g,s,GW-2-tw(s),sy-(cnt&&(Math.floor(t/60)&1)?1:0),cnt?'#ffffff':mix(c,'#ffffff',.25));
   g.fillStyle='#22252e';g.fillRect(GW-RM+3,byy,RM-5,2);g.fillStyle=c;g.fillRect(GW-RM+3,byy,Math.round((RM-5)*Math.min(1,shown[i]/GOAL)),2);
   }
  g.fillStyle='#2e313c';for(i=1;i<5;i++){g.fillRect(GW-RM,Y.track+i*L-1,RM,1);g.fillRect(0,Y.track+i*L-1,LM,1)}
@@ -557,12 +557,14 @@ function drawProgress(g,t){
  var done=progF>=.999,blink=done&&(Math.floor(t/250)&1),B=16,bx=Math.max(1,Math.min(x1-B,fx-(B>>1))),by=ly;
  var m='RACE LEADER',sc=disp[ld].toLocaleString('ru-RU'),tw1=tw(m),tw2=tw(sc,2),TW=tw1+5+tw2,tx;
  if(bx-4-TW>=x0+1)tx=bx-4-TW;else tx=Math.min(bx+B+4,x1-TW-2);
- var lc=blink?'#ffffff':'#ffd23f';txtO(g,m,tx,ly+6,lc);txtO(g,sc,tx+tw1+5,ly+3,'#ffffff',2);
+ var lc=blink?'#ffffff':'#ffd23f';txtO(g,m,tx,ly+6,lc);txtO(g,sc,tx+tw1+5,ly+3,disp[ld]<pts[ld]?'#ffe25a':'#ffffff',2);
  g.fillStyle='#000';g.fillRect(bx-1,by-1,B+2,B+2);g.fillStyle=blink?'#ffd23f':c;g.fillRect(bx,by,B,B);
  if(LOGO_C[ld]){g.drawImage(LOGO_C[ld],bx+1,by+1,B-2,B-2);if(PI.lead._s!==ld){PI.lead._s=ld;PI.lead.src=LOGOS[ld]}place(PI.lead,bx+1,by+1,B-2,B-2)}
  else{hide(PI.lead);g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
 }
+var dispF=[0,0,0,0,0];
 function fxStep(t,dt){
+ for(var di=0;di<5;di++){var dd=pts[di]-dispF[di];if(dd>0){dispF[di]=Math.min(pts[di],dispF[di]+Math.max(dd*Math.min(1,dt*3.2),dt*120));}disp[di]=Math.floor(dispF[di])}
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
  hype=Math.max(0,hype-dt*.22);cft+=dt*(2.2+hype*9);
  var nb=0;for(var i=0;i<5;i++)if(boost[i]>0&&!fs)nb++;gOff+=(60+nb*25)*dt;
@@ -638,7 +640,7 @@ function start(){
 }
 function render(){
   CARS.forEach(function(o,i){
-    disp[i]=pts[i];
+    if(pts[i]<dispF[i]){dispF[i]=pts[i];disp[i]=pts[i]} /* табло крутится как счётчик в fxStep */
   });
 }
 function dotH(i){return '<span class="dot'+(LOGOS[i]?' lg':'')+'" style="background-color:'+CARS[i].c+(LOGOS[i]?';background-image:url('+LOGOS[i]+')':'')+'"></span>'}
