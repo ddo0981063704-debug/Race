@@ -700,7 +700,7 @@ function build(){
     nb.oncontextmenu=function(e){e.preventDefault()};
     GIFTS[i].forEach(function(x,j){
       var b=document.createElement('button');
-      b.className='t'+j;b.id='gb'+i+'_'+j;b.innerHTML='<img alt="" src="'+pixEmoji(x.n.split(' ')[0])+'"><span>'+x.p+'</span><i class="x">×</i>';b.title=x.n;
+      b.className='t'+j;b.id='gb'+i+'_'+j;b.style.setProperty('--b',shade(o.c,.78));b.style.setProperty('--l',mix(o.c,'#ffffff',.38));b.style.setProperty('--d',shade(o.c,.42));b.innerHTML='<img alt="" src="'+pixEmoji(x.n.split(' ')[0])+'"><span>'+x.p+'</span><i class="x">×</i>';b.title=x.n;
       b.querySelector('.x').onclick=function(e){e.stopPropagation();setGiftImg(i,j,'',true)};
       b.onclick=function(){
         if(document.body.classList.contains('editimg')){pickGiftImg(i,j);return}
