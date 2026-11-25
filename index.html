@@ -125,11 +125,11 @@ html.app #fsb{display:none}
 .sctl{gap:6px}.sctl input{flex:1 1 100%!important}.sctl button{flex:1 1 40%;margin:2px}
 .prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed #283273}.pname{font-size:9px}
 #fov,#lov,#tiov{z-index:30}
-.stand{flex:none;position:relative;height:clamp(78px,12vh,120px);overflow:hidden;background:#1d2858;padding:0}
+.stand{flex:none;position:relative;height:var(--sth,clamp(78px,12vh,120px));overflow:hidden;background:#1d2858;padding:0}
 #scv{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 .banner{position:absolute;left:50%;top:8%;transform:translateX(-50%);max-width:84%;background:#f6f3e8;border:3px solid #000;box-shadow:inset 0 0 0 3px #d42640,inset 0 -6px 0 3px #e6e0cc,4px 4px 0 rgba(0,0,0,.45);padding:7px 16px 8px;animation:sway 1.1s steps(1) infinite;cursor:pointer}
 @keyframes sway{50%{transform:translate(-50%,2px)}}
-.ttl{flex:none;text-align:center;font-size:clamp(16px,6vw,28px);line-height:1;padding:0;color:#d42640;text-shadow:2px 2px 0 #000;letter-spacing:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
+.ttl{flex:none;text-align:center;font-size:var(--stf,clamp(16px,6vw,28px));line-height:1;padding:0;color:#d42640;text-shadow:2px 2px 0 #000;letter-spacing:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
 #tiov{z-index:20}
 .led{width:8px;height:8px;background:#555;box-shadow:0 0 0 1px #000;display:inline-block}
 .led.on{background:#3cff6a}.led.wait{background:#ffd23f;animation:blink .6s steps(1) infinite}.led.err{background:#ff3b3b}
@@ -206,6 +206,9 @@ html.app #fsb{display:none}
   <h3>🏁 Размер трассы</h3>
   <p class="hint">«Авто» — трасса занимает всё свободное место. Если сделать трассу больше, панель кнопок можно прокручивать.</p>
   <div class="row trow"><input type="range" id="trkr" min="0" max="85" step="1" class="rng"><span class="tst" id="trkv"></span></div>
+  <h3>🏟 Размер трибуны с плакатом</h3>
+  <p class="hint">0 — трибуна скрыта. Надпись на плакате растёт вместе с трибуной.</p>
+  <div class="row trow"><input type="range" id="stdr" min="0" max="30" step="1" class="rng"><span class="tst" id="stdv"></span></div>
   <h3>🎁 Размер кнопок подарков</h3>
   <div class="row trow"><input type="range" id="btnr" min="50" max="150" step="5" class="rng"><span class="tst" id="btnv"></span></div>
   <h3>🎁 Какой подарок TikTok → какая кнопка</h3>
@@ -459,7 +462,7 @@ function buildStrips(){
 function resize(){
  var dpr=window.devicePixelRatio||1,w=wrap.clientWidth-4,h=wrap.clientHeight-4;
  var dw=Math.floor(w*dpr),dh=Math.floor(h*dpr);if(dw<40||dh<40)return;
- var s=Math.max(1,Math.min(Math.floor(dh/172),Math.floor(dw/260)));
+ var s=Math.max(1,Math.min(Math.floor(dh/156),Math.floor(dw/260)));
  var nw=Math.floor(dw/s),nh=Math.floor(dh/s);
  cv.style.width=(nw*s/dpr)+'px';cv.style.height=(nh*s/dpr)+'px';
  setTimeout(function(){ovl.style.left=cv.offsetLeft+'px';ovl.style.top=cv.offsetTop+'px';ovl.style.width=cv.clientWidth+'px';ovl.style.height=cv.clientHeight+'px'},0);
@@ -953,6 +956,14 @@ document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(doc
  try{var a=localStorage.getItem('raceTrk'),b=localStorage.getItem('raceBtn');if(a!=null&&a!=='')th=+a;if(b!=null&&b!=='')bs=+b}catch(e){}
  function apT(v,save){th=v;tr.value=v;if(v<20){de.classList.remove('fixtrk');tv.textContent='авто'}else{de.classList.add('fixtrk');de.style.setProperty('--th',v+'vh');tv.textContent=v+'% экрана'}
   if(save){try{localStorage.setItem('raceTrk',v)}catch(e){}}setTimeout(resize,50)}
+ var sr=document.getElementById('stdr'),sv2=document.getElementById('stdv'),sh=-1;
+ try{var c3=localStorage.getItem('raceStand');if(c3!=null&&c3!=='')sh=+c3}catch(e){}
+ function apS(v,save){sh=v;var st=document.getElementById('stand');
+  if(v<0){sr.value=12;sv2.textContent='обычная';de.style.removeProperty('--sth');de.style.removeProperty('--stf');st.style.display=''}
+  else if(v===0){sr.value=0;sv2.textContent='скрыта';st.style.display='none'}
+  else{sr.value=v;st.style.display='';de.style.setProperty('--sth',v+'vh');de.style.setProperty('--stf',Math.max(10,Math.round(v*.28*innerHeight/100))+'px');sv2.textContent=v+'% экрана'}
+  if(save){try{localStorage.setItem('raceStand',v)}catch(e){}}setTimeout(function(){resize();buildStand2()},60)}
+ sr.oninput=function(){apS(+sr.value,true)};apS(sh,false);
  function apB(v,save){bs=v;br.value=v;de.style.setProperty('--bs',v/100);bv.textContent=v+'%';if(save){try{localStorage.setItem('raceBtn',v)}catch(e){}}setTimeout(resize,50)}
  tr.oninput=function(){apT(+tr.value,true)};br.oninput=function(){apB(+br.value,true)};apT(th,false);apB(bs,false);
  var ov=document.getElementById('tov');document.querySelectorAll('#tov .rng').forEach(function(r){
