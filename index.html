@@ -118,9 +118,9 @@ td.r,th.r{text-align:right}
 #fsb{font-size:9px;padding:7px 9px;min-height:34px;margin:2px;flex:1 1 0;--b:#111;--l:#444;--d:#000}
 html.app #fsb{display:none}
 #ttb{font-size:9px;padding:7px 9px;min-height:34px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;justify-content:center;gap:6px;margin:2px;flex:1 1 0}
-.frow{gap:6px;margin-top:7px;align-items:stretch}.frow .feed{flex:1 1 auto;min-width:0;margin-top:0}
-#setb{flex:none;margin:0;min-height:30px;padding:4px 10px;font-size:14px;display:flex;align-items:center;gap:6px;--b:#2d3780;--l:#5463c8;--d:#161b4a}
-#imgdone{display:none;flex:none;margin:0;min-height:30px;font-size:9px;--b:#b8761a;--l:#ffc451;--d:#5e3a08}body.editimg #imgdone{display:block}
+.frow{gap:8px;margin-top:8px;align-items:stretch}.frow .feed{flex:1 1 auto;min-width:0;margin-top:0;height:auto;display:flex;align-items:center}
+#setb{flex:none;margin:0;min-height:52px;min-width:96px;padding:8px 14px;font-size:24px;display:flex;align-items:center;justify-content:center;gap:8px;--b:#2d3780;--l:#5463c8;--d:#161b4a}
+#imgdone{display:none;flex:none;margin:0;min-height:52px;font-size:10px;--b:#b8761a;--l:#ffc451;--d:#5e3a08}body.editimg #imgdone{display:block}
 #gifts .row{border-left:6px solid #555;padding-left:6px}
 .sctl{gap:6px}.sctl input{flex:1 1 100%!important}.sctl button{flex:1 1 40%;margin:2px}
 .prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed #283273}.pname{font-size:9px}
@@ -162,7 +162,7 @@ html.app #fsb{display:none}
 <div class="grid">
   <div class="card pxf">
     <div id="gifts"></div>
-    <div class="row frow"><div class="feed" id="feed"></div><button id="imgdone">✔ Готово</button><button id="setb" title="Настройки"><i class="led" id="led"></i>⚙</button></div>
+    <div class="row frow"><div class="feed" id="feed"></div><button id="imgdone">✔ Готово</button><button id="setb" title="Настройки"><i class="led" id="led"></i>⚙<span style="font-size:9px">Настройки</span></button></div>
     <input type="file" id="logofile" accept="image/*" hidden>
   </div>
 </div>
