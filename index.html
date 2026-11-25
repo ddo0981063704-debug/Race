@@ -276,7 +276,7 @@ var WHEEL=null; /* раньше — data-URL колеса; теперь колё
 
 /* ================= ПИКСЕЛЬНЫЙ ДВИЖОК (только графика) ================= */
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getElementById('track');
-var GW=0,GH=0,SX=24,SW=48,LM=23,RM=25,CL=50,L=24,Y={},RUN=0,KM=1;
+var GW=0,GH=0,SX=24,SW=48,LM=23,RM=25,CK=1.5,CL=75,L=24,Y={},RUN=0,KM=1;
 var SPR=[],WH_R=[],WH_F=[],NWF=6,STANDS=[],AS=null,TOPS=null,BOTS=null,FLAGS=[],CLOUDS=[],CUP=null;
 var slotY=[0,1,2,3,4],slotT=[0,1,2,3,4],physOff=[0,0,0,0,0],laneOff=[0,0,0,0,0],gOff=0,hype=0,cft=0,pops=[],disp=[0,0,0,0,0],carX=[0,0,0,0,0];
 var LOGO_B=[null,null,null,null,null],progF=0,winCar=-1,conf=[],LOGO_C=[null,null,null,null,null],LBL_C=[null,null,null,null,null];
@@ -383,7 +383,8 @@ function pixEmoji(e){return emoCanvas(e).toDataURL()}
 
 /* ---- сцена: раскладка и заранее нарисованные слои ---- */
 function buildScene(){
- L=Math.max(19,Math.min(30,Math.floor((GH-35-40)/5)));
+ var Lmin=Math.round(19*CK)+4;L=Math.max(Lmin,Math.min(Math.max(30,Lmin),Math.floor((GH-35-40)/5)));
+ if(GH-35-5*L<26)L=Math.max(19,Math.floor((GH-35-26)/5));
  if(GH-35-5*L>62)L=Math.min(60,L+Math.floor((GH-35-5*L-62)/5));
  var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
@@ -501,9 +502,15 @@ function fx(car,points,label,user){var e=label?String(label).split(' ')[0]:'',gj
  flameP[car]=points;if(points>=1500&&!fs)superB[car]=2.6;sfxGift(points);pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function pixCircle(g,x,y,d,col){var r=d/2;g.fillStyle=col;for(var yy=0;yy<d;yy++){var dy=yy+.5-r,w=Math.round(Math.sqrt(Math.max(0,r*r-dy*dy))*2);if(w>0)g.fillRect(x+((d-w)>>1),y+yy,w,1)}}
-function carTop(i){return Y.track+Math.round(slotY[i]*L)+(L<=31?L-20:((L-19)>>1)+3)}
+function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-(CK>1?22:20)}
 function bySlot(){return [0,1,2,3,4].sort(function(a,b){return slotY[a]-slotY[b]})}
-function drawCar(g,i,x,y,t,spd){
+/* болид рисуется в буфер 1:1 и выводится в CK раз крупнее (чёткие пиксели) */
+var CBUF=null,CBX=84,CBY=10;
+function drawCar(g,i,x,y,t){if(!CBUF)CBUF=px(150,34);var q=CBUF.getContext('2d');q.clearRect(0,0,150,34);
+ drawCarRaw(q,i,CBX,CBY,t);var ys=y+19-Math.round(19*CK);
+ g.drawImage(CBUF,0,0,150,34,x-Math.round(CBX*CK),ys-Math.round(CBY*CK),Math.round(150*CK),Math.round(34*CK))}
+function CM(x,y,px1,py1){return[x+Math.round(px1*CK),y+19-Math.round(19*CK)+Math.round(py1*CK)]}
+function drawCarRaw(g,i,x,y,t,spd){
  var b=boost[i]>0,wf=Math.floor(laneOff[i]/5)%NWF;
  if(b&&!fs&&(Math.floor(t/60)&1))y-=1;
  g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+3,y+17,44,2);
@@ -545,13 +552,14 @@ function draw(t){PI_init();
   g.fillStyle='#d8dbe2';g.fillRect(x+1,Y.strip-14,2,14);g.fillRect(x+1,Y.bot,2,5);
   for(y=0;y<6;y++)for(xx=0;xx<12;xx+=2){g.fillStyle=((y>>1)+(xx>>1))&1?'#111':'#fff';g.fillRect(x+3+xx,Y.strip-14+y,2,1)}}
  var lead=ranking()[0];
- var ord=bySlot();
+ var ord=bySlot();g.save();g.beginPath();g.rect(0,Y.strip,GW,GH-Y.strip);g.clip();
  for(var oi=0;oi<5;oi++){i=ord[oi];x=LM+2+Math.round(carX[i]);y=carTop(i);drawCar(g,i,x,y,t);
-  var HS=12,hx=x+20,hy=y-6,hasH=!!LOGO_C[i];
+  var HS=Math.round(12*CK),hp=CM(x,y,20,-6),hx=hp[0],hy=hp[1],hasH=!!LOGO_C[i];
   if(hasH){pixCircle(g,hx,hy,HS,'#000');pixCircle(g,hx+1,hy+1,HS-2,CARS[i].c);
-   if(hx+HS<GW-RM&&hx>LM)place(PI.head[i],hx+1.6,hy+1.6,HS-3.2,HS-3.2);else hide(PI.head[i])}else hide(PI.head[i]);
-  if(pts[lead]>0&&i===lead){var cy=(hasH?y-11:y-4)+((Math.floor(t/300))&1);g.fillStyle='#000';g.fillRect(x+22,cy-1,7,5);g.fillStyle='#ffd23f';g.fillRect(x+23,cy+1,5,2);g.fillRect(x+23,cy,1,1);g.fillRect(x+25,cy,1,1);g.fillRect(x+27,cy,1,1);g.fillStyle='#e8321c';g.fillRect(x+25,cy+1,1,1)}}
- pops.forEach(function(p){var px0=LM+2+Math.round(carX[p.i])+16,py=carTop(p.i)-2-Math.floor(p.t*12);
+   if(hx+HS<GW-RM&&hx>LM&&hy>=Y.strip)place(PI.head[i],hx+1.6,hy+1.6,HS-3.2,HS-3.2);else hide(PI.head[i])}else hide(PI.head[i]);
+  if(pts[lead]>0&&i===lead){var cx0=hx+(HS>>1)-4,cy=(hasH?hy-5:CM(x,y,0,-4)[1])+((Math.floor(t/300))&1);g.fillStyle='#000';g.fillRect(cx0-1,cy-1,7,5);g.fillStyle='#ffd23f';g.fillRect(cx0,cy+1,5,2);g.fillRect(cx0,cy,1,1);g.fillRect(cx0+2,cy,1,1);g.fillRect(cx0+4,cy,1,1);g.fillStyle='#e8321c';g.fillRect(cx0+2,cy+1,1,1)}}
+ g.restore();
+ pops.forEach(function(p){var px0=LM+2+Math.round(carX[p.i])+Math.round(16*CK),py=carTop(p.i)+19-Math.round(21*CK)-Math.floor(p.t*12);
   var c=p.big?((Math.floor(p.t*12)&1)?'#ffffff':'#ffd23f'):'#ffffff';if(p.t<1.1){var nx=px0-1;if(p.ic){g.drawImage(p.ic,px0-1,py-5);px0+=15}txtO(g,p.s,px0,py,c,1);if(p.nk)g.drawImage(p.nk,Math.min(nx,GW-RM-p.nk.width-1),py+7)}});
  /* левая панель: иконка + очки; справа тонкий бортик */
  g.fillStyle='#14161e';g.fillRect(0,Y.track,LM,5*L);g.fillStyle='#2e313c';g.fillRect(LM-1,Y.track,1,5*L);
