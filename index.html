@@ -446,9 +446,11 @@ function loadGiftImgs(){var a=null;try{a=JSON.parse(localStorage.getItem('raceGi
  for(var i=0;i<5;i++)for(var j=0;j<4;j++){var v=(a&&a[i]&&a[i][j])||GIMG[i][j];if(v)setGiftImg(i,j,v,false)}}
 function pickGiftImg(i,j){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
  var r=new FileReader();r.onload=function(){setGiftImg(i,j,r.result,true)};r.readAsDataURL(file)};f.click()}
-function fx(car,points,label){var e=label?String(label).split(' ')[0]:'',gj=-1;GIFTS[car].forEach(function(x,j){if(x.n===label)gj=j});
+function nickCanvas(u){var n=String(u||'').trim();if(n.length>16)n=n.slice(0,15)+'…';if(!n)return null;
+ var l=labelCanvas(n,'#ffffff'),c=px(l.width+3,l.height+2),q=c.getContext('2d');q.fillStyle='rgba(0,0,0,.6)';q.fillRect(0,0,c.width,c.height);q.drawImage(l,1,1);return c}
+function fx(car,points,label,user){var e=label?String(label).split(' ')[0]:'',gj=-1;GIFTS[car].forEach(function(x,j){if(x.n===label)gj=j});
  var ic=(gj>-1&&GIMG_C[car][gj])?GIMG_C[car][gj]:(e?emoCanvas(e):null);
- pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
+ pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
 function bySlot(){return [0,1,2,3,4].sort(function(a,b){return slotY[a]-slotY[b]})}
@@ -481,7 +483,7 @@ function draw(t){PI_init();
  for(var oi=0;oi<5;oi++){i=ord[oi];x=LM+2+Math.round(carX[i]);y=carTop(i);drawCar(g,i,x,y,t);
   if(pts[lead]>0&&i===lead){var cy=y-4+((Math.floor(t/300))&1);g.fillStyle='#000';g.fillRect(x+22,cy-1,7,5);g.fillStyle='#ffd23f';g.fillRect(x+23,cy+1,5,2);g.fillRect(x+23,cy,1,1);g.fillRect(x+25,cy,1,1);g.fillRect(x+27,cy,1,1);g.fillStyle='#e8321c';g.fillRect(x+25,cy+1,1,1)}}
  pops.forEach(function(p){var px0=LM+2+Math.round(carX[p.i])+16,py=carTop(p.i)-2-Math.floor(p.t*12);
-  var c=p.big?((Math.floor(p.t*12)&1)?'#ffffff':'#ffd23f'):'#ffffff';if(p.t<1.1){if(p.ic){g.drawImage(p.ic,px0-1,py-5);px0+=15}txtO(g,p.s,px0,py,c,1)}});
+  var c=p.big?((Math.floor(p.t*12)&1)?'#ffffff':'#ffd23f'):'#ffffff';if(p.t<1.1){var nx=px0-1;if(p.ic){g.drawImage(p.ic,px0-1,py-5);px0+=15}txtO(g,p.s,px0,py,c,1);if(p.nk)g.drawImage(p.nk,Math.min(nx,GW-RM-p.nk.width-1),py+7)}});
  /* боковые панели: номера и табло очков */
  g.fillStyle='#14161e';g.fillRect(0,Y.track,LM,5*L);g.fillStyle='#2e313c';g.fillRect(LM-1,Y.track,1,5*L);
  g.fillStyle='#07080c';g.fillRect(GW-RM,Y.track,RM,5*L);g.fillStyle='#3a3d48';g.fillRect(GW-RM,Y.track,1,5*L);
@@ -648,7 +650,7 @@ function gift(user,car,points,label){
   var f=document.getElementById('feed');
   f.insertAdjacentHTML('afterbegin','<div>'+esc(user)+' → '+CARS[car].name+' '+(label||'')+' +'+points+'</div>');
   render();
-  fx(car,points,label);
+  fx(car,points,label,user);
 }
 window.addGift=function(o){
   var u=String(o.user||'Гость');
