@@ -337,10 +337,9 @@ function pixEmoji(e){return emoCanvas(e).toDataURL()}
 
 /* ---- сцена: раскладка и заранее нарисованные слои ---- */
 function buildScene(){
- L=Math.max(19,Math.min(26,Math.floor((GH-78-36)/5)));
- var crowdH=GH-78-5*L,rows=Math.max(2,Math.min(14,Math.floor(crowdH/6)));
- var sky=8+Math.max(0,crowdH-rows*6);
- Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=Y.crowd+rows*6;Y.prog=Y.ad+10;Y.strip=Y.prog+40;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
+ L=Math.max(19,Math.min(30,Math.floor((GH-35-40)/5)));
+ var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
+ Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
  RM=Math.max(40,Math.min(64,Math.round(GW*.13)));RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
  seed=1234;buildStands();buildAsphalt();buildStrips();
  FLAGS=[];var k=0;for(var x=7;x<GW-9;x+=34){FLAGS.push({x:x,c:k%6===5?null:CARS[k%6===5?0:k%5].c});k++}
@@ -472,7 +471,7 @@ function drawCar(g,i,x,y,t,spd){
 }
 function draw(t){PI_init();
  var g=ctx,i,x,y;
- g.drawImage(STANDS[0],0,0);drawTop(g,t);
+ drawTop(g,t);
  drawProgress(g,t);
  g.drawImage(TOPS,Math.floor(gOff%16),0,GW,6,0,Y.strip,GW,6);
  for(i=0;i<5;i++)g.drawImage(AS,Math.floor(physOff[i]%64),i*L,GW,L,0,Y.track+i*L,GW,L);
@@ -525,10 +524,9 @@ function place(el,x,y,w,h){if(!el)return;var k=PI_k(),key=x+','+y+','+w+','+h+',
  if(el.tagName==='B'){el.style.fontSize=Math.max(7,Math.round(h*k*.75))+'px';el.style.lineHeight=(h*k)+'px'}}
 function hide(el){if(el&&el.style.display!=='none'){el.style.display='none';el._k=''}}
 /* верхняя панель: пять иконок участников (вместо трибун) */
-function drawTop(g,t){var H=Y.ad,i,x,y;
- g.fillStyle='#0b1030';g.fillRect(0,0,GW,H);
- g.fillStyle='#10173f';for(y=0;y<H;y+=4)for(x=((y>>2)&1)*4;x<GW;x+=8)g.fillRect(x,y,4,4);
- g.fillStyle='#2a3474';g.fillRect(0,H-1,GW,1);
+function drawTop(g,t){var H=Y.ad,HB=Y.prog+20,i,x,y;
+ g.fillStyle='#0b1030';g.fillRect(0,0,GW,HB);
+ g.fillStyle='#10173f';for(y=0;y<HB;y+=4)for(x=((y>>2)&1)*4;x<GW;x+=8)g.fillRect(x,y,4,4);
  var gap=Math.max(3,Math.round(GW*.025)),S=Math.max(12,Math.min(Math.floor((GW-gap*6)/5),H-7)),tot=5*S+4*gap,x0=(GW-tot)>>1,y0=((H-S)>>1)+2,
   ld=ranking()[0],hasLead=pts[ld]>0;
  for(i=0;i<5;i++){var c=CARS[i].c,b=boost[i]>0&&!fs,isL=hasLead&&i===ld,bl=Math.floor(t/250)&1;
@@ -546,8 +544,7 @@ function drawTop(g,t){var H=Y.ad,i,x,y;
 }
 /* линия прогресса лидера между трибунами и трассой */
 function drawProgress(g,t){
- var y=Y.prog,H=40,x0=2,x1=GW-13,len=x1-x0,ld=ranking()[0],c=CARS[ld].c,fx=x0+Math.round(len*progF),ly=y+21,BH=16;
- g.fillStyle='#0b0c12';g.fillRect(0,y,GW,H);g.fillStyle='#1c1f2a';g.fillRect(0,y+H-1,GW,1);
+ var y=Y.prog,x0=2,x1=GW-13,len=x1-x0,ld=ranking()[0],c=CARS[ld].c,fx=x0+Math.round(len*progF),ly=y+2,BH=16;
  g.fillStyle='#000';g.fillRect(x0-1,ly-1,GW-x0,BH+2);g.fillStyle='#22252f';g.fillRect(x0,ly,len,BH);g.fillStyle='#1a1c24';g.fillRect(x0,ly+BH-3,len,3);
  var fw=Math.max(0,fx-x0);
  if(fw){g.fillStyle=c;g.fillRect(x0,ly,fw,BH);g.fillStyle=mix(c,'#ffffff',.45);g.fillRect(x0,ly,fw,2);g.fillStyle=shade(c,.65);g.fillRect(x0,ly+BH-3,fw,3);
@@ -555,16 +552,15 @@ function drawProgress(g,t){
   for(var sx=x0-BH-12+so;sx<x0+fw;sx+=12)for(var r=0;r<BH;r++)g.fillRect(sx+r,ly+BH-1-r,4,1);g.restore()}
  g.fillStyle='rgba(0,0,0,.35)';for(var k=1;k<10;k++)g.fillRect(x0+Math.round(len*k/10),ly+BH-4,1,4);
  for(var yy=0;yy<BH;yy+=4)for(var xx=0;xx<10;xx+=4){g.fillStyle=((yy>>2)+(xx>>2))&1?'#111':'#fff';g.fillRect(x1+1+xx,ly+yy,Math.min(4,10-xx),4)}
- var gs=GOAL.toLocaleString('ru-RU');txtO(g,gs,GW-2-tw(gs),ly-8,'#ffd23f');
- /* маркер лидера: подпись RACE LEADER + очки, под ними фото */
- var done=progF>=.999,blink=done&&(Math.floor(t/250)&1),B=16,bx=Math.max(1,Math.min(GW-B-1,fx-(B>>1))),by=ly;
+ var gs=GOAL.toLocaleString('ru-RU');txt(g,gs,x1-2-tw(gs),ly+5,'rgba(255,210,63,.55)');
+ /* маркер лидера: фото на полосе, рядом RACE LEADER и очки */
+ var done=progF>=.999,blink=done&&(Math.floor(t/250)&1),B=16,bx=Math.max(1,Math.min(x1-B,fx-(B>>1))),by=ly;
+ var m='RACE LEADER',sc=disp[ld].toLocaleString('ru-RU'),tw1=tw(m),tw2=tw(sc,2),TW=tw1+5+tw2,tx;
+ if(bx-4-TW>=x0+1)tx=bx-4-TW;else tx=Math.min(bx+B+4,x1-TW-2);
+ var lc=blink?'#ffffff':'#ffd23f';txtO(g,m,tx,ly+6,lc);txtO(g,sc,tx+tw1+5,ly+3,'#ffffff',2);
  g.fillStyle='#000';g.fillRect(bx-1,by-1,B+2,B+2);g.fillStyle=blink?'#ffd23f':c;g.fillRect(bx,by,B,B);
  if(LOGO_C[ld]){g.drawImage(LOGO_C[ld],bx+1,by+1,B-2,B-2);if(PI.lead._s!==ld){PI.lead._s=ld;PI.lead.src=LOGOS[ld]}place(PI.lead,bx+1,by+1,B-2,B-2)}
  else{hide(PI.lead);g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
- var m='RACE LEADER',sc=disp[ld].toLocaleString('ru-RU'),mw=Math.max(tw(m),tw(sc,2))+6,mx=Math.max(1,Math.min(GW-mw-1,fx-(mw>>1))),my=y+1;
- g.fillStyle='#000';g.fillRect(mx-1,my-1,mw+2,20);g.fillStyle=blink?c:'#ffd23f';g.fillRect(mx,my,mw,6);g.fillStyle='rgba(255,255,255,.45)';g.fillRect(mx,my,mw,1);
- txt(g,m,mx+((mw-tw(m))>>1),my+1,'#111');
- g.fillStyle='#14161e';g.fillRect(mx,my+6,mw,12);txt(g,sc,mx+((mw-tw(sc,2))>>1),my+7,mix(c,'#ffffff',.3),2);
 }
 function fxStep(t,dt){
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
@@ -722,7 +718,7 @@ function loop(t){
   if(fs){fs.t+=dt;if(!fs.shown&&(Math.min.apply(null,fs.x)+CL>fs.lx+8||fs.t>20)){fs.after+=dt;if(fs.after>=1){fs.shown=true;finish(fs.w)}}}
   else for(var i=0;i<CARS.length;i++)if(pts[i]>=GOAL){beginFinish(i);break}
   fxStep(t,dt);
-  if(GW&&STANDS.length)draw(t);
+  if(GW&&AS)draw(t);
   requestAnimationFrame(loop);
 }
 /* ================= ПОДКЛЮЧЕНИЕ К TIKTOK LIVE =================
