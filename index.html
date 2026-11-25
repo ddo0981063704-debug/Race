@@ -54,10 +54,13 @@ button.on{--b:#18a058;--l:#5fe39a;--d:#0b5a30}
 #gifts .t2{--b:#6a2aa8;--l:#a565e6;--d:#371456}
 #gifts .t3{--b:#b8761a;--l:#ffc451;--d:#5e3a08;color:#fff}
 .num{cursor:pointer;position:relative;width:28px;height:28px;padding:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.num img{display:block;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;pointer-events:none}
+.num img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .num.has{padding:2px}
 .num:not(.has)::after{content:'+';position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;font-size:7px;line-height:11px;text-align:center;background:var(--gold);color:#000;border:1px solid #000;text-shadow:none}
-.dot.lg{width:16px;height:16px;vertical-align:-4px;background-size:cover;image-rendering:pixelated;box-shadow:none}
+.dot.lg{width:16px;height:16px;vertical-align:-4px;background-size:cover;background-position:center;box-shadow:none}
+#ovl{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
+#ovl img{position:absolute;display:none;object-fit:cover;image-rendering:auto}
+#ovl b{position:absolute;display:none;color:#fff;font-weight:400;text-align:center;box-shadow:0 0 0 1px #000;text-shadow:1px 1px 0 #000;line-height:1}
 #gifts .tb{flex:none;width:30px;min-height:28px;height:28px;padding:0;font-size:8px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
 #gifts .tb.has{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
 #lov{z-index:20}.lbox{max-width:420px;text-align:left}
@@ -131,7 +134,7 @@ html.app #fsb{display:none}
 <body>
 <h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="fsb" title="Во весь экран">⛶</button><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
 
-<div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas></div>
+<div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas><div id="ovl"></div></div>
 
 <div class="grid">
   <div class="card pxf">
@@ -240,13 +243,13 @@ function closeLabel(){document.getElementById('lov').classList.remove('show')}
 function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGO_B[i]=null;LOGOS[i]='';logoUI(i);if(save)saveLogos();return}
  var im=new Image();im.onload=function(){var n=16,c=px(n,n),g=c.getContext('2d'),k=Math.min(im.width,im.height);
   g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,n,n);
-  var b=px(64,64),q=b.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,64,64);
+  var R2=Math.min(256,k),b=px(R2,R2),q=b.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,R2,R2);
   var c2=px(48,48),q2=c2.getContext('2d');q2.imageSmoothingQuality='high';q2.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,48,48);LOGO_B[i]=c2;
   LOGO_C[i]=c;LOGOS[i]=b.toDataURL('image/png');logoUI(i);if(save)saveLogos()};im.src=src}
 function saveLogos(){try{localStorage.setItem('raceLogos',JSON.stringify(LOGOS))}catch(e){}}
 function loadLogos(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLogos')||'null')}catch(e){}
  for(var i=0;i<5;i++){var v=(a&&a[i])||LOGOS[i];if(v)setLogo(i,v,false)}}
-function logoUI(i){var b=document.querySelector('#gifts .num[data-i="'+i+'"]');if(!b)return;
+function logoUI(i){PI_src(i);var b=document.querySelector('#gifts .num[data-i="'+i+'"]');if(!b)return;
  b.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);b.classList.toggle('has',!!LOGOS[i]);
  b.title=LOGOS[i]?'Сменить фото (долгое нажатие — убрать)':'Нажмите, чтобы поставить фото'}
 function pickLogo(i){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
@@ -408,6 +411,7 @@ function resize(){
  var s=Math.max(1,Math.min(Math.floor(dh/205),Math.floor(dw/178)));
  var nw=Math.floor(dw/s),nh=Math.floor(dh/s);
  cv.style.width=(nw*s/dpr)+'px';cv.style.height=(nh*s/dpr)+'px';
+ setTimeout(function(){ovl.style.left=cv.offsetLeft+'px';ovl.style.top=cv.offsetTop+'px';ovl.style.width=cv.clientWidth+'px';ovl.style.height=cv.clientHeight+'px'},0);
  if(nw===GW&&nh===GH)return;
  GW=nw;GH=nh;cv.width=GW;cv.height=GH;ctx.imageSmoothingEnabled=false;buildScene();
 }
@@ -437,7 +441,7 @@ function drawCar(g,i,x,y,t,spd){
  }
  g.drawImage(SPR[i],x,y);g.drawImage(WH_R[wf],x+5,y+7);g.drawImage(WH_F[wf],x+33,y+9);
 }
-function draw(t){
+function draw(t){PI_init();
  var g=ctx,i,x,y;
  g.drawImage(STANDS[0],0,0);drawTop(g,t);
  drawProgress(g,t);
@@ -459,8 +463,8 @@ function draw(t){
  for(i=0;i<5;i++){var ly=Y.track+i*L,c=CARS[i].c;
   var B=Math.min(20,L-2),bx=1,by=ly+((L-B)>>1);
   g.fillStyle='#000';g.fillRect(bx,by,B,B);g.fillStyle=c;g.fillRect(bx+1,by+1,B-2,B-2);g.fillStyle=mix(c,'#ffffff',.4);g.fillRect(bx+1,by+1,B-2,1);
-  if(LOGO_C[i])g.drawImage(LOGO_C[i],bx+2,by+2,B-4,B-4);
-  else{g.fillStyle=shade(c,.55);g.fillRect(bx+2,by+B-3,B-4,1);txtO(g,String(i+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
+  if(LOGO_C[i]){g.drawImage(LOGO_C[i],bx+2,by+2,B-4,B-4);place(PI.lane[i],bx+2,by+2,B-4,B-4)}
+  else{hide(PI.lane[i]);g.fillStyle=shade(c,.55);g.fillRect(bx+2,by+B-3,B-4,1);txtO(g,String(i+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
   var s=disp[i].toLocaleString('ru-RU'),lc=LBL_C[i],sy,byy;
   if(lc){var y0=ly+((L-17)>>1),ax=GW-RM+3,aw=RM-5;sy=y0+9;byy=y0+15;
    if(lc.width<=aw)g.drawImage(lc,GW-1-lc.width,y0);
@@ -471,6 +475,19 @@ function draw(t){
   if(i<4){g.fillStyle='#2e313c';g.fillRect(GW-RM,ly+L-1,RM,1);g.fillRect(0,ly+L-1,LM,1)}}
  if(fs&&!fs.shown&&(Math.floor(t/250)&1)){var m='FINISH!';txtO(g,m,(GW-tw(m,2))>>1,Y.track+2,'#ffd23f',2)}
 }
+/* чёткие фото поверх пиксельного холста */
+var PI=null,ovl=document.getElementById('ovl');
+function PI_init(){if(PI)return;PI={top:[],lane:[],tb:[],lead:document.createElement('img')};
+ for(var i=0;i<5;i++){var a=document.createElement('img'),b=document.createElement('img'),c=document.createElement('b');a.alt=b.alt='';c.textContent=i+1;c.style.background=CARS[i].c;
+  ovl.appendChild(a);ovl.appendChild(b);ovl.appendChild(c);PI.top.push(a);PI.lane.push(b);PI.tb.push(c)}
+ PI.lead.alt='';ovl.appendChild(PI.lead)}
+function PI_src(i){PI_init();PI.top[i].src=PI.lane[i].src=LOGOS[i]||''}
+function PI_k(){return GW?cv.clientWidth/GW:1}
+function place(el,x,y,w,h){if(!el)return;var k=PI_k(),key=x+','+y+','+w+','+h+','+k;
+ if(el._k===key){if(el.style.display!=='block')el.style.display='block';return}el._k=key;
+ el.style.left=(x*k)+'px';el.style.top=(y*k)+'px';el.style.width=(w*k)+'px';el.style.height=(h*k)+'px';el.style.display='block';
+ if(el.tagName==='B'){el.style.fontSize=Math.max(7,Math.round(h*k*.75))+'px';el.style.lineHeight=(h*k)+'px'}}
+function hide(el){if(el&&el.style.display!=='none'){el.style.display='none';el._k=''}}
 /* верхняя панель: пять иконок участников (вместо трибун) */
 function drawTop(g,t){var H=Y.ad,i,x,y;
  g.fillStyle='#0b1030';g.fillRect(0,0,GW,H);
@@ -484,10 +501,10 @@ function drawTop(g,t){var H=Y.ad,i,x,y;
   g.fillStyle='#000';g.fillRect(x-1,y-1,S+2,S+2);
   g.fillStyle=isL&&bl?'#ffd23f':c;g.fillRect(x,y,S,S);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x,y,S,1);
   var ix=x+2,iy=y+2,is=S-4;
-  if(LOGO_B[i]){g.drawImage(LOGO_B[i],ix,iy,is,is)}
-  else{g.fillStyle=shade(c,.65);g.fillRect(ix,iy,is,is);var sc=is>=22?3:is>=14?2:1,n=String(i+1);txtO(g,n,x+((S-tw(n,sc))>>1),y+((S-5*sc)>>1),'#ffffff',sc)}
+  if(LOGO_B[i]){g.drawImage(LOGO_B[i],ix,iy,is,is);place(PI.top[i],ix,iy,is,is)}
+  else{hide(PI.top[i]);g.fillStyle=shade(c,.65);g.fillRect(ix,iy,is,is);var sc=is>=22?3:is>=14?2:1,n=String(i+1);txtO(g,n,x+((S-tw(n,sc))>>1),y+((S-5*sc)>>1),'#ffffff',sc)}
   if(b&&(Math.floor(t/120)&1)){g.fillStyle='rgba(255,255,255,.5)';g.fillRect(ix,iy,is,1);g.fillRect(ix,iy+is-1,is,1);g.fillRect(ix,iy,1,is);g.fillRect(ix+is-1,iy,1,is)}
-  if(LOGO_B[i]){g.fillStyle='#000';g.fillRect(x+S-7,y+S-8,8,9);g.fillStyle=c;g.fillRect(x+S-6,y+S-7,6,7);txt(g,String(i+1),x+S-5,y+S-6,'#fff')}
+  if(LOGO_B[i])place(PI.tb[i],x+S-7,y+S-8,7,8);else hide(PI.tb[i]);
   if(isL){var cx=x+(S>>1)-3,cy=y-4;g.fillStyle='#000';g.fillRect(cx-1,cy-1,9,6);g.fillStyle='#ffd23f';g.fillRect(cx,cy+2,7,2);g.fillRect(cx,cy,1,2);g.fillRect(cx+3,cy,1,2);g.fillRect(cx+6,cy,1,2);g.fillStyle='#e8321c';g.fillRect(cx+3,cy+2,1,1)}
  }
 }
@@ -504,8 +521,8 @@ function drawProgress(g,t){
  /* маркер лидера: подпись RACE LEADER + очки, под ними фото */
  var done=progF>=.999,blink=done&&(Math.floor(t/250)&1),B=16,bx=Math.max(1,Math.min(GW-B-1,fx-(B>>1))),by=y+14;
  g.fillStyle='#000';g.fillRect(bx-1,by-1,B+2,B+2);g.fillStyle=blink?'#ffd23f':c;g.fillRect(bx,by,B,B);
- if(LOGO_C[ld])g.drawImage(LOGO_C[ld],bx+1,by+1,B-2,B-2);
- else{g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
+ if(LOGO_C[ld]){g.drawImage(LOGO_C[ld],bx+1,by+1,B-2,B-2);if(PI.lead._s!==ld){PI.lead._s=ld;PI.lead.src=LOGOS[ld]}place(PI.lead,bx+1,by+1,B-2,B-2)}
+ else{hide(PI.lead);g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
  var m='RACE LEADER',sc=disp[ld].toLocaleString('ru-RU'),mw=tw(m)+4,mx=Math.max(1,Math.min(GW-mw-1,fx-(mw>>1))),my=y+1;
  g.fillStyle='#000';g.fillRect(mx-1,my-1,mw+2,14);g.fillStyle=blink?c:'#ffd23f';g.fillRect(mx,my,mw,6);g.fillStyle='rgba(255,255,255,.45)';g.fillRect(mx,my,mw,1);
  txt(g,m,mx+2,my+1,'#111');
