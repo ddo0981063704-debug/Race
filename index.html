@@ -122,6 +122,8 @@ html.app #fsb{display:none}
 #setb{flex:none;margin:0;min-height:52px;min-width:96px;padding:8px 14px;font-size:24px;display:flex;align-items:center;justify-content:center;gap:8px;--b:#2d3780;--l:#5463c8;--d:#161b4a}
 #imgdone{display:none;flex:none;margin:0;min-height:52px;font-size:10px;--b:#b8761a;--l:#ffc451;--d:#5e3a08}body.editimg #imgdone{display:block}
 #gifts .row{border-left:6px solid #555;padding-left:6px}
+.gicon{flex:none;width:44px;height:44px;display:grid;place-items:center;font-size:14px;color:#fff;text-shadow:2px 2px 0 #000;border:2px solid #000;box-shadow:inset 2px 2px 0 rgba(255,255,255,.35),inset -2px -2px 0 rgba(0,0,0,.3);overflow:hidden}
+.gicon.has{padding:2px}.gicon img{display:block;width:100%;height:100%;object-fit:cover}
 .sctl{gap:6px}.sctl input{flex:1 1 100%!important}.sctl button{flex:1 1 40%;margin:2px}
 .prow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed #283273}.pname{font-size:9px}
 #fov,#lov,#tiov{z-index:30}
@@ -303,7 +305,7 @@ function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGO_B[i]=null;LOGOS[i]='';
 function saveLogos(){try{localStorage.setItem('raceLogos',JSON.stringify(LOGOS))}catch(e){}}
 function loadLogos(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLogos')||'null')}catch(e){}
  for(var i=0;i<5;i++){var v=(a&&a[i])||LOGOS[i];if(v)setLogo(i,v,false)}}
-function logoUI(i){PI_src(i);var b=document.querySelector('#sppl .num[data-i="'+i+'"]');if(!b)return;
+function logoUI(i){PI_src(i);var gi=document.querySelector('.gicon[data-i="'+i+'"]');if(gi){gi.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);gi.classList.toggle('has',!!LOGOS[i])}var b=document.querySelector('#sppl .num[data-i="'+i+'"]');if(!b)return;
  b.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);b.classList.toggle('has',!!LOGOS[i]);
  b.title=LOGOS[i]?'Сменить фото (долгое нажатие — убрать)':'Нажмите, чтобы поставить фото'}
 function pickLogo(i){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
@@ -686,6 +688,7 @@ function build(){
   g.innerHTML='';
   CARS.forEach(function(o,i){
     var d=document.createElement('div');d.className='row';d.style.borderLeftColor=o.c;
+    d.insertAdjacentHTML('beforeend','<span class="gicon" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>');
     var pr=document.createElement('div');pr.className='prow';
     pr.innerHTML='<span class="num" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>';
     var tb=document.createElement('button');tb.className='tb';tb.setAttribute('data-i',i);tb.textContent='Aa';tb.title='Текст над очками';tb.onclick=function(){openLabel(i)};
