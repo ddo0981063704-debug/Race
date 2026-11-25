@@ -230,7 +230,7 @@ var WHEEL=null; /* раньше — data-URL колеса; теперь колё
 
 /* ================= ПИКСЕЛЬНЫЙ ДВИЖОК (только графика) ================= */
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getElementById('track');
-var GW=0,GH=0,LM=23,RM=25,CL=50,L=24,Y={},RUN=0,KM=1;
+var GW=0,GH=0,SX=24,SW=48,LM=23,RM=25,CL=50,L=24,Y={},RUN=0,KM=1;
 var SPR=[],WH_R=[],WH_F=[],NWF=6,STANDS=[],AS=null,TOPS=null,BOTS=null,FLAGS=[],CLOUDS=[],CUP=null;
 var slotY=[0,1,2,3,4],slotT=[0,1,2,3,4],physOff=[0,0,0,0,0],laneOff=[0,0,0,0,0],gOff=0,hype=0,cft=0,pops=[],disp=[0,0,0,0,0],carX=[0,0,0,0,0];
 var LOGO_B=[null,null,null,null,null],progF=0,winCar=-1,conf=[],LOGO_C=[null,null,null,null,null],LBL_C=[null,null,null,null,null];
@@ -340,7 +340,7 @@ function buildScene(){
  L=Math.max(19,Math.min(30,Math.floor((GH-35-40)/5)));
  var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
- RM=Math.max(48,Math.min(70,Math.round(GW*.14)));RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
+ SW=Math.max(48,Math.min(70,Math.round(GW*.14)));LM=SX+SW+2;RM=3;RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
  seed=1234;buildStands();buildAsphalt();buildStrips();
  FLAGS=[];var k=0;for(var x=7;x<GW-9;x+=34){FLAGS.push({x:x,c:k%6===5?null:CARS[k%6===5?0:k%5].c});k++}
  CLOUDS=[];if(sky>=13)for(var i=0;i<Math.ceil(GW/90);i++)CLOUDS.push({x:R()*GW,y:2+RI(Math.max(1,sky-12)),w:12+RI(14),v:2+R()*3});
@@ -489,24 +489,24 @@ function draw(t){PI_init();
   if(pts[lead]>0&&i===lead){var cy=(hasH?y-11:y-4)+((Math.floor(t/300))&1);g.fillStyle='#000';g.fillRect(x+22,cy-1,7,5);g.fillStyle='#ffd23f';g.fillRect(x+23,cy+1,5,2);g.fillRect(x+23,cy,1,1);g.fillRect(x+25,cy,1,1);g.fillRect(x+27,cy,1,1);g.fillStyle='#e8321c';g.fillRect(x+25,cy+1,1,1)}}
  pops.forEach(function(p){var px0=LM+2+Math.round(carX[p.i])+16,py=carTop(p.i)-2-Math.floor(p.t*12);
   var c=p.big?((Math.floor(p.t*12)&1)?'#ffffff':'#ffd23f'):'#ffffff';if(p.t<1.1){var nx=px0-1;if(p.ic){g.drawImage(p.ic,px0-1,py-5);px0+=15}txtO(g,p.s,px0,py,c,1);if(p.nk)g.drawImage(p.nk,Math.min(nx,GW-RM-p.nk.width-1),py+7)}});
- /* боковые панели: номера и табло очков */
+ /* левая панель: иконка + очки; справа тонкий бортик */
  g.fillStyle='#14161e';g.fillRect(0,Y.track,LM,5*L);g.fillStyle='#2e313c';g.fillRect(LM-1,Y.track,1,5*L);
  g.fillStyle='#07080c';g.fillRect(GW-RM,Y.track,RM,5*L);g.fillStyle='#3a3d48';g.fillRect(GW-RM,Y.track,1,5*L);
  for(var oj=0;oj<5;oj++){i=ord[oj];var ly=Y.track+Math.round(slotY[i]*L),c=CARS[i].c;
-  g.fillStyle='#14161e';g.fillRect(0,ly,LM-1,L);g.fillStyle='#07080c';g.fillRect(GW-RM+1,ly,RM-1,L);
+  g.fillStyle='#14161e';g.fillRect(0,ly,LM-1,L);
   var B=Math.min(20,L-2),bx=1,by=ly+((L-B)>>1);
   g.fillStyle='#000';g.fillRect(bx,by,B,B);g.fillStyle=c;g.fillRect(bx+1,by+1,B-2,B-2);g.fillStyle=mix(c,'#ffffff',.4);g.fillRect(bx+1,by+1,B-2,1);
   if(LOGO_C[i]){g.drawImage(LOGO_C[i],bx+2,by+2,B-4,B-4);place(PI.lane[i],bx+2,by+2,B-4,B-4)}
   else{hide(PI.lane[i]);g.fillStyle=shade(c,.55);g.fillRect(bx+2,by+B-3,B-4,1);txtO(g,String(i+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
-  var s=disp[i].toLocaleString('ru-RU'),lc=LBL_C[i],sy,byy,ss=(L>=(lc?23:16)&&tw(s,2)<=RM-4)?2:1;
-  if(lc){var y0=ly+((L-(ss>1?23:17))>>1),ax=GW-RM+3,aw=RM-5;sy=y0+9;byy=sy+5*ss+1;
-   if(lc.width<=aw)g.drawImage(lc,GW-1-lc.width,y0);
+  var s=disp[i].toLocaleString('ru-RU'),lc=LBL_C[i],sy,byy,ss=(L>=(lc?23:16)&&tw(s,2)<=SW)?2:1;
+  if(lc){var y0=ly+((L-(ss>1?23:17))>>1),ax=SX,aw=SW;sy=y0+9;byy=sy+5*ss+1;
+   if(lc.width<=aw)g.drawImage(lc,SX,y0);
    else{var per=lc.width+14,off=Math.floor((t*.025)%per);g.save();g.beginPath();g.rect(ax,y0,aw,lc.height);g.clip();g.drawImage(lc,ax-off,y0);g.drawImage(lc,ax-off+per,y0);g.restore()}}
   else{sy=ly+((L-(5*ss+3))>>1)-1;byy=sy+5*ss+1}
-  var cnt=disp[i]<pts[i];txt(g,s,GW-2-tw(s,ss),sy-(cnt&&(Math.floor(t/60)&1)?1:0),cnt?'#ffffff':mix(c,'#ffffff',.25),ss);
-  g.fillStyle='#22252e';g.fillRect(GW-RM+3,byy,RM-5,2);g.fillStyle=c;g.fillRect(GW-RM+3,byy,Math.round((RM-5)*Math.min(1,shown[i]/GOAL)),2);
+  var cnt=disp[i]<pts[i];txt(g,s,SX,sy-(cnt&&(Math.floor(t/60)&1)?1:0),cnt?'#ffffff':mix(c,'#ffffff',.25),ss);
+  g.fillStyle='#22252e';g.fillRect(SX,byy,SW,2);g.fillStyle=c;g.fillRect(SX,byy,Math.round(SW*Math.min(1,shown[i]/GOAL)),2);
   }
- g.fillStyle='#2e313c';for(i=1;i<5;i++){g.fillRect(GW-RM,Y.track+i*L-1,RM,1);g.fillRect(0,Y.track+i*L-1,LM,1)}
+ g.fillStyle='#2e313c';for(i=1;i<5;i++)g.fillRect(0,Y.track+i*L-1,LM,1);
  if(fs&&!fs.shown&&(Math.floor(t/250)&1)){var m='FINISH!';txtO(g,m,(GW-tw(m,2))>>1,Y.track+2,'#ffd23f',2)}
 }
 /* чёткие фото поверх пиксельного холста */
@@ -628,7 +628,7 @@ function build(){
   document.getElementById('lcan').onclick=closeLabel;
   document.getElementById('lin').onkeydown=function(e){if(e.key==='Enter')document.getElementById('lok').onclick();if(e.key==='Escape')closeLabel()};
   cv.addEventListener('click',function(e){if(!GW)return;var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*GW,y=(e.clientY-r.top)/r.height*GH;
-   if(x>=GW-RM&&y>=Y.track&&y<Y.bot)openLabel(Math.min(4,Math.floor((y-Y.track)/L)))});
+   if(x>=SX-2&&x<LM&&y>=Y.track&&y<Y.bot){var sl=Math.min(4,Math.floor((y-Y.track)/L)),ci=slotT.indexOf(sl);openLabel(ci<0?sl:ci)}});
 }
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function start(){
