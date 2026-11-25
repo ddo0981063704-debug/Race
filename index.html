@@ -539,14 +539,16 @@ function drawTop(g,t){var H=Y.ad,i,x,y;
 }
 /* линия прогресса лидера между трибунами и трассой */
 function drawProgress(g,t){
- var y=Y.prog,H=34,x0=3,x1=GW-9,len=x1-x0,ld=ranking()[0],c=CARS[ld].c,fx=x0+Math.round(len*progF),ly=y+30;
+ var y=Y.prog,H=34,x0=2,x1=GW-13,len=x1-x0,ld=ranking()[0],c=CARS[ld].c,fx=x0+Math.round(len*progF),ly=y+14,BH=16;
  g.fillStyle='#0b0c12';g.fillRect(0,y,GW,H);g.fillStyle='#1c1f2a';g.fillRect(0,y+H-1,GW,1);
- g.fillStyle='#000';g.fillRect(x0-1,ly-1,len+2,4);g.fillStyle='#2a2d38';g.fillRect(x0,ly,len,2);
- g.fillStyle=c;g.fillRect(x0,ly,fx-x0,2);g.fillStyle=mix(c,'#ffffff',.5);g.fillRect(x0,ly,fx-x0,1);
- g.fillStyle='#3a3e4c';for(var k=1;k<10;k++)g.fillRect(x0+Math.round(len*k/10),ly+2,1,1);
- g.fillStyle='#f2f1e8';g.fillRect(x0-1,ly-6,1,9);
- for(var yy=0;yy<8;yy+=2)for(var xx=0;xx<6;xx+=2){g.fillStyle=((yy>>1)+(xx>>1))&1?'#111':'#fff';g.fillRect(x1+1+xx,ly-6+yy,2,2)}
- var gs=GOAL.toLocaleString('ru-RU');txtO(g,gs,GW-2-tw(gs),ly-13,'#ffd23f');
+ g.fillStyle='#000';g.fillRect(x0-1,ly-1,GW-x0,BH+2);g.fillStyle='#22252f';g.fillRect(x0,ly,len,BH);g.fillStyle='#1a1c24';g.fillRect(x0,ly+BH-3,len,3);
+ var fw=Math.max(0,fx-x0);
+ if(fw){g.fillStyle=c;g.fillRect(x0,ly,fw,BH);g.fillStyle=mix(c,'#ffffff',.45);g.fillRect(x0,ly,fw,2);g.fillStyle=shade(c,.65);g.fillRect(x0,ly+BH-3,fw,3);
+  g.save();g.beginPath();g.rect(x0,ly+2,fw,BH-5);g.clip();g.fillStyle='rgba(255,255,255,.16)';var so=Math.floor(t*.03)%12;
+  for(var sx=x0-BH-12+so;sx<x0+fw;sx+=12)for(var r=0;r<BH;r++)g.fillRect(sx+r,ly+BH-1-r,4,1);g.restore()}
+ g.fillStyle='rgba(0,0,0,.35)';for(var k=1;k<10;k++)g.fillRect(x0+Math.round(len*k/10),ly+BH-4,1,4);
+ for(var yy=0;yy<BH;yy+=4)for(var xx=0;xx<10;xx+=4){g.fillStyle=((yy>>2)+(xx>>2))&1?'#111':'#fff';g.fillRect(x1+1+xx,ly+yy,Math.min(4,10-xx),4)}
+ var gs=GOAL.toLocaleString('ru-RU');txtO(g,gs,GW-2-tw(gs),ly-8,'#ffd23f');
  /* маркер лидера: подпись RACE LEADER + очки, под ними фото */
  var done=progF>=.999,blink=done&&(Math.floor(t/250)&1),B=16,bx=Math.max(1,Math.min(GW-B-1,fx-(B>>1))),by=y+14;
  g.fillStyle='#000';g.fillRect(bx-1,by-1,B+2,B+2);g.fillStyle=blink?'#ffd23f':c;g.fillRect(bx,by,B,B);
