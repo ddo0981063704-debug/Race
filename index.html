@@ -467,15 +467,18 @@ function drawCar(g,i,x,y,t,spd){
   g.fillStyle='#ff9a1a';g.fillRect(x-n+3,y+8,n-2,3);
   g.fillStyle='#ffe25a';g.fillRect(x-n+5,y+9,Math.max(1,n-4),1);g.fillStyle='#fff';g.fillRect(x,y+9,1,1);
  }
- var sup=superB[i]>0&&!fs;
- if(sup){bigFlame(g,x-1,y+9,14,t,i);bigFlame(g,x+7,y-1,12,t+37,i+1);bigFlame(g,x+8,y+6,11,t+71,i+2);
+ var sup=superB[i]>0&&!fs,e=0;
+ if(sup){var el=2.6-superB[i];e=Math.max(0,Math.min(1,Math.min(el/.4,superB[i]/.4)));e=e*e*(3-2*e)}
+ var ty=y-3+Math.round((1-e)*6),sl=Math.round(13*e);
+ if(sup&&e>.02){g.fillStyle='#1c1d24';g.fillRect(x+12,ty+4,2,Math.max(0,y+3-ty-4));g.fillRect(x+16,ty+4,2,Math.max(0,y+3-ty-4));pod(g,x+8,ty,13)}
+ if(sup&&e>.6){var fe=(e-.6)/.4;bigFlame(g,x-1,y+9,Math.round(14*fe),t,i);bigFlame(g,x+7,ty+2,Math.round(12*fe),t+37,i+1);bigFlame(g,x+22-sl,y+6,Math.round(11*fe),t+71,i+2);
   g.fillStyle='rgba(255,255,255,.85)';for(var k2=0;k2<5;k2++){var lx2=x-10-Math.floor((t*.45+k2*29+i*13)%70);g.fillRect(lx2,y-2+k2*5,9+(k2&1)*5,1)}}
  g.drawImage(SPR[i],x,y);g.drawImage(WH_R[wf],x+5,y+7);g.drawImage(WH_F[wf],x+33,y+9);
- if(sup){pod(g,x+8,y-3);pod(g,x+9,y+4)}
+ if(sup&&sl>=3)pod(g,x+22-sl,y+4,sl);
 }
 /* доп. ракетный двигатель и большое пламя (супер-ускорение от самого дорогого подарка) */
-function pod(g,x,y){g.fillStyle='#000';g.fillRect(x-1,y-1,15,6);g.fillStyle='#c9cdd8';g.fillRect(x,y,11,4);g.fillStyle='#f4f5f8';g.fillRect(x,y,11,1);g.fillStyle='#7a7f8c';g.fillRect(x,y+3,11,1);
- g.fillStyle='#e8321c';g.fillRect(x+11,y,2,4);g.fillRect(x+13,y+1,1,2);g.fillStyle='#ff7a6a';g.fillRect(x+11,y,2,1);g.fillStyle='#2b2c34';g.fillRect(x,y,2,4);g.fillStyle='#e8321c';g.fillRect(x+4,y+1,3,2)}
+function pod(g,x,y,n){n=n||13;var bl=Math.max(1,n-2);g.fillStyle='#000';g.fillRect(x-1,y-1,n+2,6);g.fillStyle='#c9cdd8';g.fillRect(x,y,bl,4);g.fillStyle='#f4f5f8';g.fillRect(x,y,bl,1);g.fillStyle='#7a7f8c';g.fillRect(x,y+3,bl,1);
+ g.fillStyle='#e8321c';g.fillRect(x+bl,y,2,4);g.fillRect(x+bl+2,y+1,1,2);g.fillStyle='#ff7a6a';g.fillRect(x+bl,y,2,1);g.fillStyle='#2b2c34';g.fillRect(x,y,2,4);if(bl>7){g.fillStyle='#e8321c';g.fillRect(x+4,y+1,3,2)}}
 function bigFlame(g,xe,yc,len,t,k){var f=(Math.floor(t/45)+k)%3,n=len+(f===0?4:f===1?0:2);
  g.fillStyle='#b81d12';g.fillRect(xe-n,yc-1,n,3);g.fillRect(xe-n+3,yc-2,n-3,5);
  g.fillStyle='#ff5a1f';g.fillRect(xe-n+2,yc-1,n-2,3);g.fillRect(xe-n+6,yc-2,n-6,5);
