@@ -222,7 +222,7 @@ var WHEEL=null; /* раньше — data-URL колеса; теперь колё
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getElementById('track');
 var GW=0,GH=0,LM=23,RM=25,CL=50,L=24,Y={},RUN=0,KM=1;
 var SPR=[],WH_R=[],WH_F=[],NWF=6,STANDS=[],AS=null,TOPS=null,BOTS=null,FLAGS=[],CLOUDS=[],CUP=null;
-var laneOff=[0,0,0,0,0],gOff=0,hype=0,cft=0,pops=[],disp=[0,0,0,0,0],carX=[0,0,0,0,0];
+var slotY=[0,1,2,3,4],slotT=[0,1,2,3,4],physOff=[0,0,0,0,0],laneOff=[0,0,0,0,0],gOff=0,hype=0,cft=0,pops=[],disp=[0,0,0,0,0],carX=[0,0,0,0,0];
 var LOGO_B=[null,null,null,null,null],progF=0,winCar=-1,conf=[],LOGO_C=[null,null,null,null,null],LBL_C=[null,null,null,null,null];
 /* текст → пиксельная надпись (без сглаживания) */
 function labelCanvas(str,col){var f='bold 8px Verdana,Tahoma,Arial,sans-serif',m=px(1,1).getContext('2d');m.font=f;
@@ -427,7 +427,8 @@ function initGfx(){
 /* визуальный отклик на подарок (игровую логику не трогает) */
 function fx(car,points,label){var e=label?String(label).split(' ')[0]:'';pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:e?emoCanvas(e):null});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
-function carTop(i){return Y.track+i*L+L-20}
+function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
+function bySlot(){return [0,1,2,3,4].sort(function(a,b){return slotY[a]-slotY[b]})}
 function drawCar(g,i,x,y,t,spd){
  var b=boost[i]>0,wf=Math.floor(laneOff[i]/5)%NWF;
  if(b&&!fs&&(Math.floor(t/60)&1))y-=1;
@@ -446,21 +447,23 @@ function draw(t){PI_init();
  g.drawImage(STANDS[0],0,0);drawTop(g,t);
  drawProgress(g,t);
  g.drawImage(TOPS,Math.floor(gOff%16),0,GW,6,0,Y.strip,GW,6);
- for(i=0;i<5;i++)g.drawImage(AS,Math.floor(laneOff[i]%64),i*L,GW,L,0,Y.track+i*L,GW,L);
+ for(i=0;i<5;i++)g.drawImage(AS,Math.floor(physOff[i]%64),i*L,GW,L,0,Y.track+i*L,GW,L);
  g.drawImage(BOTS,Math.floor(gOff%16),0,GW,BOTS.height,0,Y.bot,GW,BOTS.height);
  if(fs){x=LM+2+Math.round(fs.lx);
   for(y=Y.track;y<Y.bot;y+=2)for(var xx=0;xx<4;xx+=2){g.fillStyle=(((y-Y.track)>>1)+(xx>>1))&1?'#111':'#fafafa';g.fillRect(x+xx,y,2,2)}
   g.fillStyle='#d8dbe2';g.fillRect(x+1,Y.strip-14,2,14);g.fillRect(x+1,Y.bot,2,5);
   for(y=0;y<6;y++)for(xx=0;xx<12;xx+=2){g.fillStyle=((y>>1)+(xx>>1))&1?'#111':'#fff';g.fillRect(x+3+xx,Y.strip-14+y,2,1)}}
  var lead=ranking()[0];
- for(i=0;i<5;i++){x=LM+2+Math.round(carX[i]);y=carTop(i);drawCar(g,i,x,y,t);
+ var ord=bySlot();
+ for(var oi=0;oi<5;oi++){i=ord[oi];x=LM+2+Math.round(carX[i]);y=carTop(i);drawCar(g,i,x,y,t);
   if(pts[lead]>0&&i===lead){var cy=y-4+((Math.floor(t/300))&1);g.fillStyle='#000';g.fillRect(x+22,cy-1,7,5);g.fillStyle='#ffd23f';g.fillRect(x+23,cy+1,5,2);g.fillRect(x+23,cy,1,1);g.fillRect(x+25,cy,1,1);g.fillRect(x+27,cy,1,1);g.fillStyle='#e8321c';g.fillRect(x+25,cy+1,1,1)}}
  pops.forEach(function(p){var px0=LM+2+Math.round(carX[p.i])+16,py=carTop(p.i)-2-Math.floor(p.t*12);
   var c=p.big?((Math.floor(p.t*12)&1)?'#ffffff':'#ffd23f'):'#ffffff';if(p.t<1.1){if(p.ic){g.drawImage(p.ic,px0-1,py-5);px0+=15}txtO(g,p.s,px0,py,c,1)}});
  /* боковые панели: номера и табло очков */
  g.fillStyle='#14161e';g.fillRect(0,Y.track,LM,5*L);g.fillStyle='#2e313c';g.fillRect(LM-1,Y.track,1,5*L);
  g.fillStyle='#07080c';g.fillRect(GW-RM,Y.track,RM,5*L);g.fillStyle='#3a3d48';g.fillRect(GW-RM,Y.track,1,5*L);
- for(i=0;i<5;i++){var ly=Y.track+i*L,c=CARS[i].c;
+ for(var oj=0;oj<5;oj++){i=ord[oj];var ly=Y.track+Math.round(slotY[i]*L),c=CARS[i].c;
+  g.fillStyle='#14161e';g.fillRect(0,ly,LM-1,L);g.fillStyle='#07080c';g.fillRect(GW-RM+1,ly,RM-1,L);
   var B=Math.min(20,L-2),bx=1,by=ly+((L-B)>>1);
   g.fillStyle='#000';g.fillRect(bx,by,B,B);g.fillStyle=c;g.fillRect(bx+1,by+1,B-2,B-2);g.fillStyle=mix(c,'#ffffff',.4);g.fillRect(bx+1,by+1,B-2,1);
   if(LOGO_C[i]){g.drawImage(LOGO_C[i],bx+2,by+2,B-4,B-4);place(PI.lane[i],bx+2,by+2,B-4,B-4)}
@@ -472,7 +475,8 @@ function draw(t){PI_init();
   else{sy=ly+(L>>1)-5;byy=ly+(L>>1)+3}
   txt(g,s,GW-2-tw(s),sy,mix(c,'#ffffff',.25));
   g.fillStyle='#22252e';g.fillRect(GW-RM+3,byy,RM-5,2);g.fillStyle=c;g.fillRect(GW-RM+3,byy,Math.round((RM-5)*Math.min(1,shown[i]/GOAL)),2);
-  if(i<4){g.fillStyle='#2e313c';g.fillRect(GW-RM,ly+L-1,RM,1);g.fillRect(0,ly+L-1,LM,1)}}
+  }
+ g.fillStyle='#2e313c';for(i=1;i<5;i++){g.fillRect(GW-RM,Y.track+i*L-1,RM,1);g.fillRect(0,Y.track+i*L-1,LM,1)}
  if(fs&&!fs.shown&&(Math.floor(t/250)&1)){var m='FINISH!';txtO(g,m,(GW-tw(m,2))>>1,Y.track+2,'#ffd23f',2)}
 }
 /* чёткие фото поверх пиксельного холста */
@@ -593,7 +597,7 @@ function build(){
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function start(){
   pts=CARS.map(function(){return 0});shown=pts.slice();boost=pts.slice();donors={};over=false;fs=null;
-  pops=[];hype=0;winCar=-1;progF=0;
+  pops=[];hype=0;winCar=-1;progF=0;slotY=[0,1,2,3,4];slotT=[0,1,2,3,4];
   document.getElementById('feed').innerHTML='';
   document.getElementById('ov').classList.remove('show');
   render();
@@ -671,8 +675,10 @@ function loop(t){
     var pct=shown[i]/GOAL*100;
     var sway=6+Math.sin(t/350+i*1.7)*5+Math.sin(t/910+i)*3;
     carX[i]=fs?(fs.x[i]+sway*.35):(pct*KM+sway*.35);
-    laneOff[i]+=((boost[i]>0&&!fs)?150:60)*dt;
+    var lsp=((boost[i]>0&&!fs)?150:60)*dt;laneOff[i]+=lsp;physOff[slotT[i]]+=lsp;
   });
+  var rk=ranking();for(var q=0;q<5;q++)slotT[rk[q]]=q;
+  for(q=0;q<5;q++){slotY[q]+=(slotT[q]-slotY[q])*Math.min(1,dt*5);if(Math.abs(slotT[q]-slotY[q])<.02)slotY[q]=slotT[q]}
   if(fs){fs.adv+=fs.v*dt;fs.lx-=fs.lv*dt}
   acc+=dt;if(acc>.3){acc=0;render()}
   if(fs){fs.t+=dt;if(!fs.shown&&(Math.min.apply(null,fs.x)+CL>fs.lx+8||fs.t>20)){fs.after+=dt;if(fs.after>=1){fs.shown=true;finish(fs.w)}}}
