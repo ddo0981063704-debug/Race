@@ -451,7 +451,7 @@ function nickCanvas(u){var n=String(u||'').trim();if(n.length>16)n=n.slice(0,15)
  var l=labelCanvas(n,'#ffffff'),c=px(l.width+3,l.height+2),q=c.getContext('2d');q.fillStyle='rgba(0,0,0,.6)';q.fillRect(0,0,c.width,c.height);q.drawImage(l,1,1);return c}
 function fx(car,points,label,user){var e=label?String(label).split(' ')[0]:'',gj=-1;GIFTS[car].forEach(function(x,j){if(x.n===label)gj=j});
  var ic=(gj>-1&&GIMG_C[car][gj])?GIMG_C[car][gj]:(e?emoCanvas(e):null);
- sfxGift(points);pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
+ if(points>=1500&&!fs)superB[car]=2.6;sfxGift(points);pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function pixCircle(g,x,y,d,col){var r=d/2;g.fillStyle=col;for(var yy=0;yy<d;yy++){var dy=yy+.5-r,w=Math.round(Math.sqrt(Math.max(0,r*r-dy*dy))*2);if(w>0)g.fillRect(x+((d-w)>>1),y+yy,w,1)}}
 function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
@@ -467,8 +467,21 @@ function drawCar(g,i,x,y,t,spd){
   g.fillStyle='#ff9a1a';g.fillRect(x-n+3,y+8,n-2,3);
   g.fillStyle='#ffe25a';g.fillRect(x-n+5,y+9,Math.max(1,n-4),1);g.fillStyle='#fff';g.fillRect(x,y+9,1,1);
  }
+ var sup=superB[i]>0&&!fs;
+ if(sup){bigFlame(g,x-1,y+9,14,t,i);bigFlame(g,x+7,y-1,12,t+37,i+1);bigFlame(g,x+8,y+6,11,t+71,i+2);
+  g.fillStyle='rgba(255,255,255,.85)';for(var k2=0;k2<5;k2++){var lx2=x-10-Math.floor((t*.45+k2*29+i*13)%70);g.fillRect(lx2,y-2+k2*5,9+(k2&1)*5,1)}}
  g.drawImage(SPR[i],x,y);g.drawImage(WH_R[wf],x+5,y+7);g.drawImage(WH_F[wf],x+33,y+9);
+ if(sup){pod(g,x+8,y-3);pod(g,x+9,y+4)}
 }
+/* доп. ракетный двигатель и большое пламя (супер-ускорение от самого дорогого подарка) */
+function pod(g,x,y){g.fillStyle='#000';g.fillRect(x-1,y-1,15,6);g.fillStyle='#c9cdd8';g.fillRect(x,y,11,4);g.fillStyle='#f4f5f8';g.fillRect(x,y,11,1);g.fillStyle='#7a7f8c';g.fillRect(x,y+3,11,1);
+ g.fillStyle='#e8321c';g.fillRect(x+11,y,2,4);g.fillRect(x+13,y+1,1,2);g.fillStyle='#ff7a6a';g.fillRect(x+11,y,2,1);g.fillStyle='#2b2c34';g.fillRect(x,y,2,4);g.fillStyle='#e8321c';g.fillRect(x+4,y+1,3,2)}
+function bigFlame(g,xe,yc,len,t,k){var f=(Math.floor(t/45)+k)%3,n=len+(f===0?4:f===1?0:2);
+ g.fillStyle='#b81d12';g.fillRect(xe-n,yc-1,n,3);g.fillRect(xe-n+3,yc-2,n-3,5);
+ g.fillStyle='#ff5a1f';g.fillRect(xe-n+2,yc-1,n-2,3);g.fillRect(xe-n+6,yc-2,n-6,5);
+ g.fillStyle='#ffb21a';g.fillRect(xe-n+6,yc-1,n-6,3);
+ g.fillStyle='#ffe96a';g.fillRect(xe-n+10,yc,Math.max(1,n-10),1);g.fillStyle='#fff';g.fillRect(xe-3,yc,3,1);
+ g.fillStyle='#ffd23f';for(var s2=0;s2<3;s2++){var sxp=xe-n-2-((Math.floor(t/30)+s2*7+k*3)%9),syp=yc-2+((s2*5+Math.floor(t/40))%5);g.fillRect(sxp,syp,1,1)}}
 function draw(t){PI_init();
  var g=ctx,i,x,y;
  drawTop(g,t);
@@ -562,8 +575,9 @@ function drawProgress(g,t){
  if(LOGO_C[ld]){g.drawImage(LOGO_C[ld],bx+1,by+1,B-2,B-2);if(PI.lead._s!==ld){PI.lead._s=ld;PI.lead.src=LOGOS[ld]}place(PI.lead,bx+1,by+1,B-2,B-2)}
  else{hide(PI.lead);g.fillStyle=shade(c,.7);g.fillRect(bx+1,by+1,B-2,B-2);txtO(g,String(ld+1),bx+(B>>1)-1,by+(B>>1)-2,'#ffffff')}
 }
-var dispF=[0,0,0,0,0];
+var dispF=[0,0,0,0,0],superB=[0,0,0,0,0];
 function fxStep(t,dt){
+ for(var sb=0;sb<5;sb++)if(superB[sb]>0)superB[sb]=fs?0:superB[sb]-dt;
  for(var di=0;di<5;di++){var dd=pts[di]-dispF[di];if(dd>0){dispF[di]=Math.min(pts[di],dispF[di]+Math.max(dd*Math.min(1,dt*3.2),dt*120));}disp[di]=Math.floor(dispF[di])}
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
  hype=Math.max(0,hype-dt*.22);cft+=dt*(2.2+hype*9);
@@ -633,7 +647,7 @@ function build(){
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function start(){
   pts=CARS.map(function(){return 0});shown=pts.slice();boost=pts.slice();donors={};over=false;fs=null;
-  pops=[];hype=0;winCar=-1;progF=0;if(typeof AU!=='undefined')AU.mode='race';slotY=[0,1,2,3,4];slotT=[0,1,2,3,4];
+  pops=[];hype=0;winCar=-1;progF=0;superB=[0,0,0,0,0];if(typeof AU!=='undefined')AU.mode='race';slotY=[0,1,2,3,4];slotT=[0,1,2,3,4];
   document.getElementById('feed').innerHTML='';
   document.getElementById('ov').classList.remove('show');
   render();
@@ -711,7 +725,7 @@ function loop(t){
     var pct=shown[i]/GOAL*100;
     var sway=6+Math.sin(t/350+i*1.7)*5+Math.sin(t/910+i)*3;
     carX[i]=fs?(fs.x[i]+sway*.35):(pct*KM+sway*.35);
-    var lsp=((boost[i]>0&&!fs)?150:60)*dt;laneOff[i]+=lsp;physOff[slotT[i]]+=lsp;
+    var lsp=((superB[i]>0&&!fs)?260:(boost[i]>0&&!fs)?150:60)*dt;laneOff[i]+=lsp;physOff[slotT[i]]+=lsp;
   });
   var rk=ranking();for(var q=0;q<5;q++)slotT[rk[q]]=q;
   for(q=0;q<5;q++){slotY[q]+=(slotT[q]-slotY[q])*Math.min(1,dt*5);if(Math.abs(slotT[q]-slotY[q])<.02)slotY[q]=slotT[q]}
