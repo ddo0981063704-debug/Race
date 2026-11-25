@@ -47,13 +47,20 @@ button{--b:#2d3780;--l:#5463c8;--d:#161b4a;cursor:pointer;color:#fff;background:
   box-shadow:0 0 0 2px #000,inset 2px 2px 0 var(--l),inset -2px -3px 0 var(--d);text-shadow:1px 1px 0 #000;touch-action:manipulation}
 button:active{transform:translateY(2px);box-shadow:0 0 0 2px #000,inset 2px 3px 0 var(--d)}
 button.on{--b:#18a058;--l:#5fe39a;--d:#0b5a30}
-#gifts button{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;padding:3px 3px;min-height:32px;font-size:8px}
-#gifts button img{width:24px;height:24px;flex:none;image-rendering:pixelated}
+#gifts button{flex:1 1 0;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 2px 6px;min-height:60px;font-size:10px}
+#gifts button img{width:34px;height:34px;flex:none;image-rendering:pixelated;object-fit:cover}
+#gifts button img.own{image-rendering:auto;box-shadow:0 0 0 2px #000}
+#gifts button .x{display:none;position:absolute;top:-4px;right:-4px;width:18px;height:18px;line-height:16px;font-size:10px;background:#d42640;color:#fff;border:2px solid #000;text-shadow:none}
+body.editimg #gifts button.own .x{display:block}
+body.editimg #gifts button:not(.tb){outline:2px dashed var(--gold);outline-offset:-4px}
+#imgm.on{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
+#gifts{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))!important;gap:7px 14px!important}
+#gifts .row{gap:6px}
 #gifts .t0{--b:#2d3780;--l:#5463c8;--d:#161b4a}
 #gifts .t1{--b:#1d7a4a;--l:#45c27f;--d:#0d4027}
 #gifts .t2{--b:#6a2aa8;--l:#a565e6;--d:#371456}
 #gifts .t3{--b:#b8761a;--l:#ffc451;--d:#5e3a08;color:#fff}
-.num{cursor:pointer;position:relative;width:28px;height:28px;padding:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.num{cursor:pointer;position:relative;width:38px;height:38px;font-size:12px;padding:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .num img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .num.has{padding:2px}
 .num:not(.has)::after{content:'+';position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;font-size:7px;line-height:11px;text-align:center;background:var(--gold);color:#000;border:1px solid #000;text-shadow:none}
@@ -61,7 +68,7 @@ button.on{--b:#18a058;--l:#5fe39a;--d:#0b5a30}
 #ovl{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 #ovl img{position:absolute;display:none;object-fit:cover;image-rendering:auto}
 #ovl b{position:absolute;display:none;color:#fff;font-weight:400;text-align:center;box-shadow:0 0 0 1px #000;text-shadow:1px 1px 0 #000;line-height:1}
-#gifts .tb{flex:none;width:30px;min-height:28px;height:28px;padding:0;font-size:8px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
+#gifts .tb{flex:none;width:38px;min-height:38px;height:38px;padding:0;font-size:9px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
 #gifts .tb.has{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
 #lov{z-index:20}.lbox{max-width:420px;text-align:left}
 #lin{width:100%;font:inherit;font-size:10px;color:#7dff8a;background:#000;border:2px solid #fff;padding:10px 8px;margin:4px 0 12px}
@@ -142,6 +149,7 @@ html.app #fsb{display:none}
     <div class="row ctl">
       <input id="nick" placeholder="Ник зрителя">
       <button id="auto">▶ Авто-зрители</button>
+      <button id="imgm" title="Поставить свои картинки на кнопки подарков">🖼 Картинки</button>
       <button id="reset">↺ Заново</button>
     </div>
     <div class="feed" id="feed"></div>
@@ -425,7 +433,22 @@ function initGfx(){
 }
 
 /* визуальный отклик на подарок (игровую логику не трогает) */
-function fx(car,points,label){var e=label?String(label).split(' ')[0]:'';pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:e?emoCanvas(e):null});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
+/* свои картинки на кнопках подарков */
+var GIMG=[['','','',''],['','','',''],['','','',''],['','','',''],['','','','']],GIMG_C=[[],[],[],[],[]];
+function giftSrc(i,j){return GIMG[i][j]||pixEmoji(GIFTS[i][j].n.split(' ')[0])}
+function giftUI(i,j){var b=document.getElementById('gb'+i+'_'+j);if(b){var im=b.querySelector('img');im.src=giftSrc(i,j);im.classList.toggle('own',!!GIMG[i][j]);b.classList.toggle('own',!!GIMG[i][j])}
+ var m=document.querySelector('#mr'+i+'_'+j+' img');if(m)m.src=giftSrc(i,j)}
+function setGiftImg(i,j,src,save){var done=function(){giftUI(i,j);if(save){try{localStorage.setItem('raceGiftImgs',JSON.stringify(GIMG))}catch(e){var f=document.getElementById('feed');f.insertAdjacentHTML('afterbegin','<div>⚠ мало места для картинок в браузере</div>')}}};
+ if(!src){GIMG[i][j]='';GIMG_C[i][j]=null;done();return}
+ var im=new Image();im.onload=function(){var k=Math.min(im.width,im.height),sx=(im.width-k)/2,sy=(im.height-k)/2,c=px(128,128),q=c.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(im,sx,sy,k,k,0,0,128,128);
+  var t=px(14,14),tq=t.getContext('2d');tq.imageSmoothingQuality='high';tq.drawImage(c,0,0,14,14);GIMG_C[i][j]=t;GIMG[i][j]=c.toDataURL('image/png');done()};im.src=src}
+function loadGiftImgs(){var a=null;try{a=JSON.parse(localStorage.getItem('raceGiftImgs')||'null')}catch(e){}
+ for(var i=0;i<5;i++)for(var j=0;j<4;j++){var v=(a&&a[i]&&a[i][j])||GIMG[i][j];if(v)setGiftImg(i,j,v,false)}}
+function pickGiftImg(i,j){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
+ var r=new FileReader();r.onload=function(){setGiftImg(i,j,r.result,true)};r.readAsDataURL(file)};f.click()}
+function fx(car,points,label){var e=label?String(label).split(' ')[0]:'',gj=-1;GIFTS[car].forEach(function(x,j){if(x.n===label)gj=j});
+ var ic=(gj>-1&&GIMG_C[car][gj])?GIMG_C[car][gj]:(e?emoCanvas(e):null);
+ pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
 function bySlot(){return [0,1,2,3,4].sort(function(a,b){return slotY[a]-slotY[b]})}
@@ -577,8 +600,10 @@ function build(){
     nb.oncontextmenu=function(e){e.preventDefault()};
     GIFTS[i].forEach(function(x,j){
       var b=document.createElement('button');
-      b.className='t'+j;b.innerHTML='<img alt="" src="'+pixEmoji(x.n.split(' ')[0])+'"><span>'+x.p+'</span>';b.title=x.n;
+      b.className='t'+j;b.id='gb'+i+'_'+j;b.innerHTML='<img alt="" src="'+pixEmoji(x.n.split(' ')[0])+'"><span>'+x.p+'</span><i class="x">×</i>';b.title=x.n;
+      b.querySelector('.x').onclick=function(e){e.stopPropagation();setGiftImg(i,j,'',true)};
       b.onclick=function(){
+        if(document.body.classList.contains('editimg')){pickGiftImg(i,j);return}
         var n=document.getElementById('nick').value.trim()||pick(names);
         gift(n,i,x.p,x.n);
       };
@@ -586,7 +611,9 @@ function build(){
     });
     g.appendChild(d);
   });
-  loadLogos();loadLabels();
+  loadLogos();loadLabels();loadGiftImgs();
+  document.getElementById('imgm').onclick=function(){var on=document.body.classList.toggle('editimg');this.classList.toggle('on',on);this.textContent=on?'✔ Готово':'🖼 Картинки';
+   if(on){var f=document.getElementById('feed');f.insertAdjacentHTML('afterbegin','<div>🖼 Нажмите на подарок, чтобы выбрать картинку. × — вернуть как было</div>')}};
   document.getElementById('lok').onclick=function(){setLabel(lblI,document.getElementById('lin').value,true);closeLabel()};
   document.getElementById('lclr').onclick=function(){setLabel(lblI,'',true);closeLabel()};
   document.getElementById('lcan').onclick=closeLabel;
@@ -700,7 +727,7 @@ function norm(s){return String(s==null?'':s).trim().toLowerCase()}
 function ttFind(name,id){var n=norm(name),d=String(id||'');
  for(var i=0;i<5;i++)for(var j=0;j<4;j++){var m=norm(TT.map[i][j]);if(m&&(m===n||m===d))return[i,j]}return null}
 function ttBuildMap(){var h='';CARS.forEach(function(o,i){GIFTS[i].forEach(function(x,j){
-  h+='<div class="mrow" id="mr'+i+'_'+j+'"><span class="num" style="background:'+o.c+'">'+(i+1)+'</span><img alt="" src="'+pixEmoji(x.n.split(' ')[0])+'"><span class="pp">'+x.p+'</span>'+
+  h+='<div class="mrow" id="mr'+i+'_'+j+'"><span class="num" style="background:'+o.c+'">'+(i+1)+'</span><img alt="" src="'+giftSrc(i,j)+'"><span class="pp">'+x.p+'</span>'+
    '<input data-i="'+i+'" data-j="'+j+'" placeholder="'+esc(x.n.split(' ').slice(1).join(' '))+' → подарок TikTok" value="'+esc(TT.map[i][j])+'"><button data-i="'+i+'" data-j="'+j+'" title="Привязать следующий подарок из эфира">🎯</button></div>'})});
  var el=document.getElementById('tmap');el.innerHTML=h;
  el.querySelectorAll('input').forEach(function(n){n.oninput=function(){TT.map[+n.dataset.i][+n.dataset.j]=n.value.trim();ttSave();ttRecent()}});
