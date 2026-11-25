@@ -37,7 +37,11 @@ h1 .chk{flex:none;width:18px;height:18px;border:2px solid #000;background:conic-
 h1 small{font-size:8px;color:#000;background:var(--gold);padding:5px 6px;box-shadow:0 0 0 2px #000,3px 3px 0 2px #000;white-space:nowrap}
 .track{flex:1 1 0;min-height:0;padding:2px;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
-.grid{flex:none}
+.grid{flex:none;zoom:var(--bs,1)}
+html.fixtrk .track{flex:none;height:var(--th,50vh)}
+html.fixtrk .grid{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.rng{flex:1 1 auto;border:0!important;background:none!important;padding:0!important;min-height:30px;accent-color:#ffd23f}
+#tov.peek{background:transparent}#tov.peek .box{opacity:.15}
 .card{padding:9px 10px 8px}
 #gifts{display:grid;gap:5px 14px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));margin-bottom:7px}
 .row{display:flex;gap:5px;flex-wrap:nowrap;align-items:center}
@@ -182,8 +186,14 @@ html.app #fsb{display:none}
   </details>
   <div class="row trow"><button id="tcon">▶ Подключить</button><span class="tst" id="tst">не подключено</span></div>
   <h3>↕ Отступ сверху (под интерфейс TikTok)</h3>
+  <p class="hint" style="color:#7dff8a">Пока двигаете ползунок, окно становится прозрачным — видно игру.</p>
   <p class="hint">Опускает игру ниже, чтобы верхние кнопки и аватар эфира TikTok её не закрывали.</p>
-  <div class="row trow"><input type="range" id="topr" min="0" max="250" step="5" style="flex:1 1 auto;border:0;background:none;padding:0;min-height:30px"><span class="tst" id="topv"></span></div>
+  <div class="row trow"><input type="range" id="topr" min="0" max="250" step="5" class="rng"><span class="tst" id="topv"></span></div>
+  <h3>🏁 Размер трассы</h3>
+  <p class="hint">«Авто» — трасса занимает всё свободное место. Если сделать трассу больше, панель кнопок можно прокручивать.</p>
+  <div class="row trow"><input type="range" id="trkr" min="0" max="85" step="1" class="rng"><span class="tst" id="trkv"></span></div>
+  <h3>🎁 Размер кнопок подарков</h3>
+  <div class="row trow"><input type="range" id="btnr" min="50" max="150" step="5" class="rng"><span class="tst" id="btnv"></span></div>
   <h3>🎁 Какой подарок TikTok → какая кнопка</h3>
   <p class="hint">Нажмите 🎯 у нужной кнопки и попросите кого-то отправить этот подарок в эфире (или отправьте сами) — он привяжется автоматически. Можно и просто вписать название, как в TikTok (например Rose).</p>
   <div id="tmap"></div>
@@ -355,6 +365,7 @@ function pixEmoji(e){return emoCanvas(e).toDataURL()}
 /* ---- сцена: раскладка и заранее нарисованные слои ---- */
 function buildScene(){
  L=Math.max(19,Math.min(30,Math.floor((GH-35-40)/5)));
+ if(GH-35-5*L>62)L=Math.min(60,L+Math.floor((GH-35-5*L-62)/5));
  var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
  SW=Math.max(48,Math.min(70,Math.round(GW*.14)));LM=SX+SW+2;RM=3;RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
@@ -434,7 +445,7 @@ function buildStrips(){
 function resize(){
  var dpr=window.devicePixelRatio||1,w=wrap.clientWidth-4,h=wrap.clientHeight-4;
  var dw=Math.floor(w*dpr),dh=Math.floor(h*dpr);if(dw<40||dh<40)return;
- var s=Math.max(1,Math.min(Math.floor(dh/172),Math.floor(dw/178)));
+ var s=Math.max(1,Math.min(Math.floor(dh/172),Math.floor(dw/260)));
  var nw=Math.floor(dw/s),nh=Math.floor(dh/s);
  cv.style.width=(nw*s/dpr)+'px';cv.style.height=(nh*s/dpr)+'px';
  setTimeout(function(){ovl.style.left=cv.offsetLeft+'px';ovl.style.top=cv.offsetTop+'px';ovl.style.width=cv.clientWidth+'px';ovl.style.height=cv.clientHeight+'px'},0);
@@ -471,7 +482,7 @@ function fx(car,points,label,user){var e=label?String(label).split(' ')[0]:'',gj
  flameP[car]=points;if(points>=1500&&!fs)superB[car]=2.6;sfxGift(points);pops.push({i:car,s:'+'+points,t:0,big:points>=1500,ic:ic,nk:nickCanvas(user)});if(pops.length>25)pops.shift();hype=Math.min(1,hype+.12+points/2500)}
 
 function pixCircle(g,x,y,d,col){var r=d/2;g.fillStyle=col;for(var yy=0;yy<d;yy++){var dy=yy+.5-r,w=Math.round(Math.sqrt(Math.max(0,r*r-dy*dy))*2);if(w>0)g.fillRect(x+((d-w)>>1),y+yy,w,1)}}
-function carTop(i){return Y.track+Math.round(slotY[i]*L)+L-20}
+function carTop(i){return Y.track+Math.round(slotY[i]*L)+(L<=31?L-20:((L-19)>>1)+3)}
 function bySlot(){return [0,1,2,3,4].sort(function(a,b){return slotY[a]-slotY[b]})}
 function drawCar(g,i,x,y,t,spd){
  var b=boost[i]>0,wf=Math.floor(laneOff[i]/5)%NWF;
@@ -894,6 +905,17 @@ document.getElementById('mub').onclick=function(e){e.stopPropagation();AU.on=!AU
 musicUI();
 ['pointerdown','touchend','keydown'].forEach(function(ev){document.addEventListener(ev,function(){if(AU.on&&!AU.timer)musicStart();else if(AU.on&&AU.ctx&&AU.ctx.state!=='running')AU.ctx.resume()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(AU.on)AU.ctx.resume()});
+
+/* размер трассы и кнопок */
+(function(){var de=document.documentElement,tr=document.getElementById('trkr'),tv=document.getElementById('trkv'),br=document.getElementById('btnr'),bv=document.getElementById('btnv'),th=0,bs=100;
+ try{var a=localStorage.getItem('raceTrk'),b=localStorage.getItem('raceBtn');if(a!=null&&a!=='')th=+a;if(b!=null&&b!=='')bs=+b}catch(e){}
+ function apT(v,save){th=v;tr.value=v;if(v<20){de.classList.remove('fixtrk');tv.textContent='авто'}else{de.classList.add('fixtrk');de.style.setProperty('--th',v+'vh');tv.textContent=v+'% экрана'}
+  if(save){try{localStorage.setItem('raceTrk',v)}catch(e){}}setTimeout(resize,50)}
+ function apB(v,save){bs=v;br.value=v;de.style.setProperty('--bs',v/100);bv.textContent=v+'%';if(save){try{localStorage.setItem('raceBtn',v)}catch(e){}}setTimeout(resize,50)}
+ tr.oninput=function(){apT(+tr.value,true)};br.oninput=function(){apB(+br.value,true)};apT(th,false);apB(bs,false);
+ var ov=document.getElementById('tov');document.querySelectorAll('#tov .rng').forEach(function(r){
+  r.addEventListener('pointerdown',function(){ov.classList.add('peek')});r.addEventListener('touchstart',function(){ov.classList.add('peek')},{passive:true});
+  ['pointerup','pointercancel','touchend','change','blur'].forEach(function(ev){r.addEventListener(ev,function(){ov.classList.remove('peek')})})})})();
 
 /* отступ сверху под интерфейс TikTok */
 (function(){var r=document.getElementById('topr'),v=document.getElementById('topv'),cur=110;
