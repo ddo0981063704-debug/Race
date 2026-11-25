@@ -72,7 +72,7 @@ body.editimg #gifts button:not(.tb){outline:2px dashed var(--gold);outline-offse
 #gifts .tb{flex:none;width:38px;min-height:38px;height:38px;padding:0;font-size:9px;margin:2px 0;--b:#3a3f5c;--l:#6b7299;--d:#1d2033}
 #gifts .tb.has{--b:#b8761a;--l:#ffc451;--d:#5e3a08}
 #lov{z-index:20}.lbox{max-width:420px;text-align:left}
-#lin{width:100%;font:inherit;font-size:10px;color:#7dff8a;background:#000;border:2px solid #fff;padding:10px 8px;margin:4px 0 12px}
+#lin,#tiin{width:100%;font:inherit;font-size:10px;color:#7dff8a;background:#000;border:2px solid #fff;padding:10px 8px;margin:4px 0 12px}
 .lrow{justify-content:flex-end;gap:6px;flex-wrap:wrap}#lclr{--b:#9c1f33;--l:#e2546a;--d:#4f0c18}#lok{--b:#18a058;--l:#5fe39a;--d:#0b5a30}
 #cv{cursor:pointer}
 .ctl{gap:6px}
@@ -110,10 +110,13 @@ td.r,th.r{text-align:right}
 @keyframes glow{50%{background:#5a4500}}
 @keyframes pulse{50%{--b:#ef3a55}}
 .hr{display:flex;align-items:center;gap:8px}
-#mub{font-size:12px;padding:4px 8px;min-height:28px;margin:0;--b:#18a058;--l:#5fe39a;--d:#0b5a30}#mub.off{--b:#111;--l:#444;--d:#000;color:#777;text-decoration:line-through}
-#fsb{font-size:12px;padding:4px 8px;min-height:28px;margin:0;--b:#111;--l:#444;--d:#000}
+#mub{font-size:9px;padding:7px 9px;min-height:34px;margin:2px;flex:1 1 0;--b:#18a058;--l:#5fe39a;--d:#0b5a30}#mub.off{--b:#111;--l:#444;--d:#000;color:#777;text-decoration:line-through}
+#fsb{font-size:9px;padding:7px 9px;min-height:34px;margin:2px;flex:1 1 0;--b:#111;--l:#444;--d:#000}
 html.app #fsb{display:none}
-#ttb{font-size:8px;padding:6px 8px;min-height:28px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;gap:6px;margin:0}
+#ttb{font-size:9px;padding:7px 9px;min-height:34px;--b:#111;--l:#444;--d:#000;display:flex;align-items:center;justify-content:center;gap:6px;margin:2px;flex:1 1 0}
+.ctl2{margin-top:6px}
+.ttl{flex:none;text-align:center;font-size:22px;line-height:1;padding:2px 0 0;color:var(--gold);text-shadow:3px 3px 0 #c0392b,5px 5px 0 #000;letter-spacing:4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;-webkit-user-select:none}
+#tiov{z-index:20}
 .led{width:8px;height:8px;background:#555;box-shadow:0 0 0 1px #000;display:inline-block}
 .led.on{background:#3cff6a}.led.wait{background:#ffd23f;animation:blink .6s steps(1) infinite}.led.err{background:#ff3b3b}
 #tov,#fov{z-index:20}.lbox p,.tbox p{text-align:left}.tbox{max-width:560px;text-align:left}
@@ -141,9 +144,10 @@ html.app #fsb{display:none}
 </style>
 </head>
 <body>
-<h1><span class="logo"><i class="chk"></i>ГОНКА ПОДАРКОВ</span><span class="hr"><small>ФИНИШ 10 000</small><button id="mub" title="Музыка вкл/выкл">♪</button><button id="fsb" title="Во весь экран">⛶</button><button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button></span></h1>
 
 <div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas><div id="ovl"></div></div>
+
+<div class="ttl" id="ttl" title="Нажмите, чтобы изменить надпись">RACE</div>
 
 <div class="grid">
   <div class="card pxf">
@@ -153,6 +157,11 @@ html.app #fsb{display:none}
       <button id="auto">▶ Авто-зрители</button>
       <button id="imgm" title="Поставить свои картинки на кнопки подарков">🖼 Картинки</button>
       <button id="reset">↺ Заново</button>
+    </div>
+    <div class="row ctl ctl2">
+      <button id="ttb" title="Подключение к TikTok LIVE"><i class="led" id="led"></i>TikTok</button>
+      <button id="mub" title="Музыка вкл/выкл">♪ Музыка</button>
+      <button id="fsb" title="Во весь экран">⛶ Экран</button>
     </div>
     <div class="feed" id="feed"></div>
     <input type="file" id="logofile" accept="image/*" hidden>
@@ -186,6 +195,11 @@ html.app #fsb{display:none}
   <p class="hint">1. Нажмите кнопку «Поделиться» <b style="color:#fff">⬆︎</b> (в Safari — внизу, в Chrome — в адресной строке).<br>2. Выберите <b style="color:#fff">«На экран „Домой“»</b> (может быть ниже в списке — пролистайте).<br>3. Нажмите <b style="color:#fff">«Добавить»</b>.<br>4. Запускайте игру с иконки «Гонка» на экране телефона.</p>
   <p class="hint">Ник, фото, тексты и привязки подарков в приложении нужно будет ввести ещё раз один раз — iPhone хранит их отдельно от браузера.</p>
   <div class="row lrow"><button id="fok">Понятно</button></div>
+</div></div>
+<div class="ov" id="tiov"><div class="box pxf lbox">
+  <h3>Надпись между трассой и кнопками</h3>
+  <input id="tiin" maxlength="24" placeholder="RACE" autocomplete="off">
+  <div class="row lrow"><button id="tiok">OK</button><button id="tidef">Вернуть RACE</button><button id="tican">Отмена</button></div>
 </div></div>
 <div class="ov" id="lov"><div class="box pxf lbox">
   <h3 id="lt">Текст над очками</h3>
@@ -871,12 +885,24 @@ function sfxGift(p){if(!AU.on||!AU.ctx||AU.ctx.state!=='running')return;var c=AU
 function sfxWin(){if(!AU.on||!AU.ctx)return;AU.mode='win';var c=AU.ctx,t=c.currentTime+.05;
  [[72,0],[76,1],[79,2],[84,3],[79,4],[84,5],[88,6]].forEach(function(n){tone(mf(n[0]),t+n[1]*.12,n[1]===6?.9:.11,.12,'square');tone(mf(n[0]-12),t+n[1]*.12,n[1]===6?.9:.11,.1,'triangle')});
  noise(t+.72,.6,.2,'highpass',5000)}
-function musicUI(){var b=document.getElementById('mub');b.classList.toggle('off',!AU.on);b.textContent=AU.on?'♪':'♪'}
+function musicUI(){var b=document.getElementById('mub');b.classList.toggle('off',!AU.on);b.textContent=AU.on?'♪ Музыка':'♪ Музыка'}
 document.getElementById('mub').onclick=function(e){e.stopPropagation();AU.on=!AU.on;try{localStorage.setItem('raceMusic',AU.on?'1':'0')}catch(x){}musicUI();
  if(AU.on){musicStart();if(over)AU.mode='win'}else{musicStop();if(AU.ctx)AU.ctx.suspend()}};
 musicUI();
 ['pointerdown','touchend','keydown'].forEach(function(ev){document.addEventListener(ev,function(){if(AU.on&&!AU.timer)musicStart();else if(AU.on&&AU.ctx&&AU.ctx.state!=='running')AU.ctx.resume()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(AU.on)AU.ctx.resume()});
+
+/* надпись между трассой и кнопками (по умолчанию RACE, меняется нажатием) */
+var TITLE='RACE';
+(function(){var el=document.getElementById('ttl'),o=document.getElementById('tiov'),n=document.getElementById('tiin');
+ function set(v,save){TITLE=String(v==null?'':v).trim().slice(0,24)||'RACE';el.textContent=TITLE;if(save){try{localStorage.setItem('raceTitle',TITLE)}catch(e){}}}
+ try{var v=localStorage.getItem('raceTitle');if(v)set(v,false)}catch(e){}
+ el.onclick=function(){n.value=TITLE;o.classList.add('show');setTimeout(function(){n.focus();n.select()},50)};
+ document.getElementById('tiok').onclick=function(){set(n.value,true);o.classList.remove('show')};
+ document.getElementById('tidef').onclick=function(){set('RACE',true);o.classList.remove('show')};
+ document.getElementById('tican').onclick=function(){o.classList.remove('show')};
+ n.onkeydown=function(e){if(e.key==='Enter')document.getElementById('tiok').onclick();if(e.key==='Escape')o.classList.remove('show')};
+})();
 
 /* полноэкранный режим */
 var isApp=(window.navigator.standalone===true)||(window.matchMedia&&(matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches));
