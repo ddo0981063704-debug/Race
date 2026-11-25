@@ -24,7 +24,7 @@ body{
   background-image:linear-gradient(45deg,#0c1132 25%,transparent 25%,transparent 75%,#0c1132 75%),linear-gradient(45deg,#0c1132 25%,transparent 25%,transparent 75%,#0c1132 75%);
   background-size:8px 8px;background-position:0 0,4px 4px;
   display:flex;flex-direction:column;gap:8px;max-width:1100px;margin:0 auto;
-  padding:calc(8px + env(safe-area-inset-top,0px)) 10px calc(8px + env(safe-area-inset-bottom,0px));
+  padding:max(var(--top,110px),calc(8px + env(safe-area-inset-top,0px))) 10px calc(8px + env(safe-area-inset-bottom,0px));
   -webkit-font-smoothing:none;-webkit-tap-highlight-color:transparent;
 }
 /* пиксельная рамка со «срезанными» углами */
@@ -181,6 +181,9 @@ html.app #fsb{display:none}
     <input id="turl" placeholder="wss://... или ws://localhost:21213" autocomplete="off" autocapitalize="off">
   </details>
   <div class="row trow"><button id="tcon">▶ Подключить</button><span class="tst" id="tst">не подключено</span></div>
+  <h3>↕ Отступ сверху (под интерфейс TikTok)</h3>
+  <p class="hint">Опускает игру ниже, чтобы верхние кнопки и аватар эфира TikTok её не закрывали.</p>
+  <div class="row trow"><input type="range" id="topr" min="0" max="250" step="5" style="flex:1 1 auto;border:0;background:none;padding:0;min-height:30px"><span class="tst" id="topv"></span></div>
   <h3>🎁 Какой подарок TikTok → какая кнопка</h3>
   <p class="hint">Нажмите 🎯 у нужной кнопки и попросите кого-то отправить этот подарок в эфире (или отправьте сами) — он привяжется автоматически. Можно и просто вписать название, как в TikTok (например Rose).</p>
   <div id="tmap"></div>
@@ -431,7 +434,7 @@ function buildStrips(){
 function resize(){
  var dpr=window.devicePixelRatio||1,w=wrap.clientWidth-4,h=wrap.clientHeight-4;
  var dw=Math.floor(w*dpr),dh=Math.floor(h*dpr);if(dw<40||dh<40)return;
- var s=Math.max(1,Math.min(Math.floor(dh/205),Math.floor(dw/178)));
+ var s=Math.max(1,Math.min(Math.floor(dh/172),Math.floor(dw/178)));
  var nw=Math.floor(dw/s),nh=Math.floor(dh/s);
  cv.style.width=(nw*s/dpr)+'px';cv.style.height=(nh*s/dpr)+'px';
  setTimeout(function(){ovl.style.left=cv.offsetLeft+'px';ovl.style.top=cv.offsetTop+'px';ovl.style.width=cv.clientWidth+'px';ovl.style.height=cv.clientHeight+'px'},0);
@@ -891,6 +894,12 @@ document.getElementById('mub').onclick=function(e){e.stopPropagation();AU.on=!AU
 musicUI();
 ['pointerdown','touchend','keydown'].forEach(function(ev){document.addEventListener(ev,function(){if(AU.on&&!AU.timer)musicStart();else if(AU.on&&AU.ctx&&AU.ctx.state!=='running')AU.ctx.resume()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(AU.on)AU.ctx.resume()});
+
+/* отступ сверху под интерфейс TikTok */
+(function(){var r=document.getElementById('topr'),v=document.getElementById('topv'),cur=110;
+ try{var sv=localStorage.getItem('raceTop');if(sv!=null&&sv!=='')cur=+sv}catch(e){}
+ function apply(px,save){cur=px;document.documentElement.style.setProperty('--top',px+'px');r.value=px;v.textContent=px+' px';if(save){try{localStorage.setItem('raceTop',px)}catch(e){}}setTimeout(resize,50)}
+ r.oninput=function(){apply(+r.value,true)};apply(cur,false)})();
 
 /* надпись между трассой и кнопками (по умолчанию RACE, меняется нажатием) */
 var TITLE='RACE';
