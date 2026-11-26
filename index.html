@@ -38,6 +38,16 @@ h1 small{font-size:8px;color:#000;background:var(--gold);padding:5px 6px;box-sha
 .track{flex:1 1 0;min-height:0;padding:2px;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
 .grid{flex:none;zoom:var(--bs,1)}
+.icons{flex:none;display:flex;justify-content:center;align-items:center;gap:3%;height:var(--ich,64px);padding:6px 8px 4px;background:#0b1030;background-image:linear-gradient(45deg,#10173f 25%,transparent 25%,transparent 75%,#10173f 75%),linear-gradient(45deg,#10173f 25%,transparent 25%,transparent 75%,#10173f 75%);background-size:8px 8px;background-position:0 0,4px 4px;overflow:visible}
+.icons.off{display:none}
+.ic{position:relative;height:calc(100% - 8px);aspect-ratio:1;max-width:17%;border:3px solid var(--c);box-shadow:0 0 0 2px #000,4px 4px 0 rgba(0,0,0,.45);background:var(--c);display:grid;place-items:center;color:#fff;font-size:calc(var(--ich,64px)*.35);text-shadow:2px 2px 0 #000;transition:transform .08s steps(1)}
+.ic img{width:100%;height:100%;object-fit:cover;display:block}
+.ic i{position:absolute;right:-4px;bottom:-4px;font-style:normal;font-size:9px;background:var(--c);border:2px solid #000;padding:2px 3px;line-height:1;display:none}
+.ic.has i{display:block}
+.ic.lead{animation:icl .5s steps(1) infinite}
+.ic.lead::before{content:'';position:absolute;left:50%;top:-14px;width:18px;height:10px;transform:translateX(-50%);background:linear-gradient(#ffd23f,#ffd23f) 0 100%/100% 5px no-repeat,linear-gradient(#ffd23f,#ffd23f) 0 0/4px 6px no-repeat,linear-gradient(#ffd23f,#ffd23f) 7px 0/4px 6px no-repeat,linear-gradient(#ffd23f,#ffd23f) 14px 0/4px 6px no-repeat;filter:drop-shadow(0 0 0 #000) drop-shadow(1px 1px 0 #000)}
+@keyframes icl{50%{border-color:#ffd23f}}
+.ic.hit{transform:translateY(-3px);box-shadow:0 0 0 2px #fff,4px 4px 0 rgba(0,0,0,.45)}
 html.fixtrk .track{flex:none;height:var(--th,50vh)}
 html.fixtrk .grid{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
 .rng{flex:1 1 auto;border:0!important;background:none!important;padding:0!important;min-height:30px;accent-color:#ffd23f}
@@ -163,6 +173,7 @@ html.app #fsb{display:none}
 </head>
 <body>
 
+<div class="icons pxf" id="icons"></div>
 <div class="track pxf" id="track"><canvas id="cv" width="10" height="10"></canvas><div id="ovl"></div></div>
 
 <div class="stand pxf" id="stand"><canvas id="scv" width="10" height="10"></canvas><div class="banner" id="bnr"><div class="ttl" id="ttl" title="Нажмите, чтобы изменить надпись">RACE</div></div></div>
@@ -207,6 +218,9 @@ html.app #fsb{display:none}
   <p class="hint" style="color:#7dff8a">Пока двигаете ползунок, окно становится прозрачным — видно игру.</p>
   <p class="hint">Опускает игру ниже, чтобы верхние кнопки и аватар эфира TikTok её не закрывали.</p>
   <div class="row trow"><input type="range" id="topr" min="0" max="250" step="5" class="rng"><span class="tst" id="topv"></span></div>
+  <h3>🔝 Размер иконок участников (сверху)</h3>
+  <p class="hint">0 — иконки скрыты.</p>
+  <div class="row trow"><input type="range" id="icr" min="0" max="160" step="4" class="rng"><span class="tst" id="icv"></span></div>
   <h3>🏁 Размер трассы</h3>
   <p class="hint">«Авто» — трасса занимает всё свободное место. Если сделать трассу больше, панель кнопок можно прокручивать.</p>
   <div class="row trow"><input type="range" id="trkr" min="0" max="85" step="1" class="rng"><span class="tst" id="trkv"></span></div>
@@ -310,7 +324,7 @@ function setLogo(i,src,save){if(!src){LOGO_C[i]=null;LOGO_B[i]=null;LOGOS[i]='';
 function saveLogos(){try{localStorage.setItem('raceLogos',JSON.stringify(LOGOS))}catch(e){}}
 function loadLogos(){var a=null;try{a=JSON.parse(localStorage.getItem('raceLogos')||'null')}catch(e){}
  for(var i=0;i<5;i++){var v=(a&&a[i])||LOGOS[i];if(v)setLogo(i,v,false)}}
-function logoUI(i){PI_src(i);var gi=document.querySelector('.gicon[data-i="'+i+'"]');if(gi){gi.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);gi.classList.toggle('has',!!LOGOS[i])}var b=document.querySelector('#sppl .num[data-i="'+i+'"]');if(!b)return;
+function logoUI(i){PI_src(i);icUI(i);var gi=document.querySelector('.gicon[data-i="'+i+'"]');if(gi){gi.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);gi.classList.toggle('has',!!LOGOS[i])}var b=document.querySelector('#sppl .num[data-i="'+i+'"]');if(!b)return;
  b.innerHTML=LOGOS[i]?'<img alt="" src="'+LOGOS[i]+'">':String(i+1);b.classList.toggle('has',!!LOGOS[i]);
  b.title=LOGOS[i]?'Сменить фото (долгое нажатие — убрать)':'Нажмите, чтобы поставить фото'}
 function pickLogo(i){var f=document.getElementById('logofile');f.onchange=function(){var file=f.files&&f.files[0];f.value='';if(!file)return;
@@ -388,10 +402,9 @@ function pixEmoji(e){return emoCanvas(e).toDataURL()}
 
 /* ---- сцена: раскладка и заранее нарисованные слои ---- */
 function buildScene(){
- var Lmin=Math.round(19*CK)+4;L=Math.max(Lmin,Math.min(Math.max(30,Lmin),Math.floor((GH-35-40)/5)));
- if(GH-35-5*L<26)L=Math.max(19,Math.floor((GH-35-26)/5));
- if(GH-35-5*L>62)L=Math.min(60,L+Math.floor((GH-35-5*L-62)/5));
- var topH=Math.max(24,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
+ /* иконки участников теперь отдельной строкой над трассой — вся высота холста идёт на трассу */
+ L=Math.max(19,Math.min(60,Math.floor((GH-35-4)/5)));
+ var topH=Math.max(4,GH-35-5*L),rows=Math.max(2,Math.floor((topH-13)/6)),sky=8;
  Y.sky=sky;Y.roof=sky;Y.crowd=sky+5;Y.rows=rows;Y.ad=topH;Y.prog=topH;Y.strip=Y.prog+20;Y.track=Y.strip+6;Y.bot=Y.track+5*L;
  SW=Math.max(48,Math.min(70,Math.round(GW*.14)));LM=SX+SW+2;RM=3;RUN=GW-LM-RM;buildLabels();KM=(RUN-CL-6)/100;
  seed=1234;buildStands();buildAsphalt();buildStrips();
@@ -470,7 +483,7 @@ function buildStrips(){
 function resize(){
  var dpr=window.devicePixelRatio||1,w=wrap.clientWidth-4,h=wrap.clientHeight-4;
  var dw=Math.floor(w*dpr),dh=Math.floor(h*dpr);if(dw<40||dh<40)return;
- var s=Math.max(1,Math.min(Math.floor(dh/156),Math.floor(dw/260)));
+ var s=Math.max(1,Math.min(Math.floor(dh/134),Math.floor(dw/260)));
  var nw=Math.floor(dw/s),nh=Math.floor(dh/s);
  cv.style.width=(nw*s/dpr)+'px';cv.style.height=(nh*s/dpr)+'px';
  setTimeout(function(){ovl.style.left=cv.offsetLeft+'px';ovl.style.top=cv.offsetTop+'px';ovl.style.width=cv.clientWidth+'px';ovl.style.height=cv.clientHeight+'px'},0);
@@ -602,9 +615,11 @@ function place(el,x,y,w,h){if(!el)return;var k=PI_k(),key=x+','+y+','+w+','+h+',
  if(el.tagName==='B'){el.style.fontSize=Math.max(7,Math.round(h*k*.75))+'px';el.style.lineHeight=(h*k)+'px'}}
 function hide(el){if(el&&el.style.display!=='none'){el.style.display='none';el._k=''}}
 /* верхняя панель: пять иконок участников (вместо трибун) */
+var ICX=true;
 function drawTop(g,t){var H=Y.ad,HB=Y.prog+20,i,x,y;
  g.fillStyle='#0b1030';g.fillRect(0,0,GW,HB);
  g.fillStyle='#10173f';for(y=0;y<HB;y+=4)for(x=((y>>2)&1)*4;x<GW;x+=8)g.fillRect(x,y,4,4);
+ if(ICX){for(i=0;i<5;i++){hide(PI.top[i]);hide(PI.tb[i])}return}
  var gap=Math.max(3,Math.round(GW*.025)),S=Math.max(12,Math.min(Math.floor((GW-gap*6)/5),H-7)),tot=5*S+4*gap,x0=(GW-tot)>>1,y0=((H-S)>>1)+2,
   ld=ranking()[0],hasLead=pts[ld]>0;
  for(i=0;i<5;i++){var c=CARS[i].c,b=boost[i]>0&&!fs,isL=hasLead&&i===ld,bl=Math.floor(t/250)&1;
@@ -665,7 +680,7 @@ function buildStand2(){var c=document.getElementById('scv'),box=document.getElem
 function drawStand2(t){var c=document.getElementById('scv');if(!ST2.frames.length||!c)return;var g=c.getContext('2d');g.drawImage(ST2.frames[Math.floor(cft)%4],0,0);
  if(Math.random()<.05+hype*.8){var x=Math.floor(Math.random()*ST2.w),y=Math.floor(Math.random()*ST2.h);g.fillStyle='#fff';g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3)}}
 function fxStep(t,dt){
- drawStand2(t);
+ drawStand2(t);icStep(t);
  for(var sb=0;sb<5;sb++)if(superB[sb]>0)superB[sb]=fs?0:superB[sb]-dt;
  for(var di=0;di<5;di++){var dd=pts[di]-dispF[di];if(dd>0){dispF[di]=Math.min(pts[di],dispF[di]+Math.max(dd*Math.min(1,dt*3.2),dt*120));}disp[di]=Math.floor(dispF[di])}
  var tgt=fs?1:Math.min(1,Math.max.apply(null,shown)/GOAL);progF+=(tgt-progF)*Math.min(1,dt*5);
@@ -973,11 +988,27 @@ musicUI();
 ['pointerdown','touchend','keydown'].forEach(function(ev){document.addEventListener(ev,function(){if(AU.on&&!AU.timer)musicStart();else if(AU.on&&AU.ctx&&AU.ctx.state!=='running')AU.ctx.resume()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else if(AU.on)AU.ctx.resume()});
 
+/* иконки участников над трассой (HTML — фото чёткие) */
+function icBuild(){var box=document.getElementById('icons');if(box.children.length)return;CARS.forEach(function(o,i){var d=document.createElement('div');d.className='ic';d.id='ic'+i;d.style.setProperty('--c',o.c);d.innerHTML='<span>'+(i+1)+'</span><i>'+(i+1)+'</i>';box.appendChild(d)})}
+function icUI(i){icBuild();var d=document.getElementById('ic'+i);if(!d)return;var sp=d.firstChild;
+ if(LOGOS[i]){if(sp.tagName!=='IMG'){var im=document.createElement('img');im.alt='';d.replaceChild(im,sp);sp=im}sp.src=LOGOS[i]}
+ else if(sp.tagName==='IMG'){var s2=document.createElement('span');s2.textContent=i+1;d.replaceChild(s2,sp)}
+ d.classList.toggle('has',!!LOGOS[i])}
+var icState='';
+function icStep(t){if(!pts)return;var ld=ranking()[0],st='';for(var i=0;i<5;i++){var L1=pts[ld]>0&&i===ld,H1=boost[i]>0&&!fs&&(Math.floor(t/90)&1);st+=(L1?1:0)+''+(H1?1:0)}
+ if(st===icState)return;icState=st;for(i=0;i<5;i++){var d=document.getElementById('ic'+i);if(!d)continue;d.classList.toggle('lead',st[i*2]==='1');d.classList.toggle('hit',st[i*2+1]==='1')}}
+icBuild();for(var ii=0;ii<5;ii++)icUI(ii);
+
 /* размер трассы и кнопок */
 (function(){var de=document.documentElement,tr=document.getElementById('trkr'),tv=document.getElementById('trkv'),br=document.getElementById('btnr'),bv=document.getElementById('btnv'),th=0,bs=100;
  try{var a=localStorage.getItem('raceTrk'),b=localStorage.getItem('raceBtn');if(a!=null&&a!=='')th=+a;if(b!=null&&b!=='')bs=+b}catch(e){}
  function apT(v,save){th=v;tr.value=v;if(v<20){de.classList.remove('fixtrk');tv.textContent='авто'}else{de.classList.add('fixtrk');de.style.setProperty('--th',v+'vh');tv.textContent=v+'% экрана'}
   if(save){try{localStorage.setItem('raceTrk',v)}catch(e){}}setTimeout(resize,50)}
+ var ir=document.getElementById('icr'),iv=document.getElementById('icv'),ih=64;
+ try{var c4=localStorage.getItem('raceIcons');if(c4!=null&&c4!=='')ih=+c4}catch(e){}
+ function apI(v,save){ih=v;ir.value=v;var b=document.getElementById('icons');if(v<20){b.classList.add('off');iv.textContent='скрыты'}else{b.classList.remove('off');de.style.setProperty('--ich',v+'px');iv.textContent=v+' px'}
+  if(save){try{localStorage.setItem('raceIcons',v)}catch(e){}}setTimeout(resize,60)}
+ ir.oninput=function(){apI(+ir.value,true)};apI(ih,false);
  var sr=document.getElementById('stdr'),sv2=document.getElementById('stdv'),sh=-1;
  try{var c3=localStorage.getItem('raceStand');if(c3!=null&&c3!=='')sh=+c3}catch(e){}
  function apS(v,save){sh=v;var st=document.getElementById('stand');
