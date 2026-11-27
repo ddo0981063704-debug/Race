@@ -1,5 +1,5 @@
-// Приёмник подарков TikTok LIVE для «Гонки подарков».
-// Открывает игру (index.html) и передаёт в неё подарки из эфира.
+// Приёмник подарков TikTok LIVE для «Гонки подарков» и «Футбол-баттла».
+// Открывает меню выбора игры (/), гонку (/race) и футбол (/ball) и передаёт в них подарки из эфира.
 // Запуск: npm install && node server.js   (на Render всё делается само)
 const http = require('http');
 const fs = require('fs');
@@ -15,9 +15,12 @@ const EV = {
   END: WE.STREAM_END || 'streamEnd',
   DISC: CE.DISCONNECTED || 'disconnected',
   ERR: CE.ERROR || 'error',
+  ROOM: WE.ROOM_USER || 'roomUser',
 };
 const PORT = process.env.PORT || 3000;
 const GAME = path.join(__dirname, 'index.html');
+const BALL = path.join(__dirname, 'ball.html');
+const MENU = path.join(__dirname, 'menu.html');
 const rooms = new Map();
 const cool = new Map(), fails = new Map(), block = new Map(); // время последней попытки и число неудач подряд (по нику) // ник → { clients, conn, state, retry, stop }
 
@@ -52,6 +55,7 @@ function connect(room) {
   status(room, 'wait', 'подключаюсь к эфиру @' + room.nick + '…');
 
   conn.on(EV.GIFT, (d) => { if (room.conn === conn) broadcast(room, { event: 'gift', data: pickGift(d) }); });
+  conn.on(EV.ROOM, (d) => { if (room.conn === conn && d && d.viewerCount != null) { room.viewers = { event: 'roomUser', data: { viewerCount: d.viewerCount } }; broadcast(room, room.viewers); } });
   conn.on(EV.END, () => { if (room.conn === conn) retryLater(room, 'эфир завершён — жду новый эфир…', 30000); });
   conn.on(EV.DISC, () => { if (room.conn === conn) retryLater(room, 'связь с эфиром потеряна — переподключаюсь…', 10000); });
   conn.on(EV.ERR, (e) => console.error('[@' + room.nick + '] ошибка:', e && (e.message || e)));
@@ -92,6 +96,7 @@ function join(nick, res) {
   clearTimeout(room.stop);
   room.clients.add(res);
   if (room.state) send(res, room.state);
+  if (room.viewers) send(res, room.viewers);
   // не подключаемся чаще, чем разрешает пауза (иначе быстро кончается дневной лимит)
   if (!room.conn && !room.retry) {
     const last = cool.get(nick) || 0, n = fails.get(nick) || 0;
@@ -121,7 +126,7 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/health' || url.pathname === '/ping') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({ race: true, connector: !!Conn }));
+    return res.end(JSON.stringify({ race: true, ball: true, connector: !!Conn }));
   }
   if (url.pathname === '/events') {
     const nick = String(url.searchParams.get('u') || '').trim().replace(/^@/, '');
@@ -138,7 +143,8 @@ const server = http.createServer((req, res) => {
     req.on('close', () => { clearInterval(ka); leave(room, res); });
     return;
   }
-  const STATIC = { '/manifest.webmanifest': 'application/manifest+json', '/icon-180.png': 'image/png', '/icon-192.png': 'image/png', '/icon-512.png': 'image/png' };
+  const STATIC = { '/manifest.webmanifest': 'application/manifest+json', '/icon-180.png': 'image/png', '/icon-192.png': 'image/png', '/icon-512.png': 'image/png',
+    '/ball.webmanifest': 'application/manifest+json', '/ball-180.png': 'image/png', '/ball-192.png': 'image/png', '/ball-512.png': 'image/png' };
   if (STATIC[url.pathname]) {
     return fs.readFile(path.join(__dirname, url.pathname.slice(1)), (err, buf) => {
       if (err) { res.writeHead(404); return res.end('not found'); }
@@ -146,7 +152,21 @@ const server = http.createServer((req, res) => {
       res.end(buf);
     });
   }
-  if (url.pathname === '/' || url.pathname === '/index.html') {
+  if (url.pathname === '/ball' || url.pathname === '/ball/' || url.pathname === '/ball.html') {
+    return fs.readFile(BALL, (err, buf) => {
+      if (err) { res.writeHead(500); return res.end('ball.html не найден рядом с server.js'); }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(buf);
+    });
+  }
+  if (url.pathname === '/' || url.pathname === '/menu' || url.pathname === '/menu.html') {
+    return fs.readFile(MENU, (err, buf) => {
+      if (err) { res.writeHead(500); return res.end('menu.html не найден рядом с server.js'); }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(buf);
+    });
+  }
+  if (url.pathname === '/race' || url.pathname === '/race/' || url.pathname === '/index.html') {
     return fs.readFile(GAME, (err, buf) => {
       if (err) { res.writeHead(500); return res.end('index.html не найден рядом с server.js'); }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
@@ -156,4 +176,4 @@ const server = http.createServer((req, res) => {
   res.writeHead(404); res.end('not found');
 });
 
-server.listen(PORT, () => console.log('Гонка подарков: http://localhost:' + PORT));
+server.listen(PORT, () => console.log('Меню: http://localhost:' + PORT + '   Гонка: /race   Футбол: /ball'));

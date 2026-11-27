@@ -1,6 +1,6 @@
 {
-  "name": "Гонка подарков",
-  "short_name": "Гонка",
+  "name": "TikTok игры",
+  "short_name": "Игры",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",

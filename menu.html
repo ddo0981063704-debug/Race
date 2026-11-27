@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Игры">
+<meta name="theme-color" content="#070a1c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>Выбор игры</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{color:#f4f4ff;font-family:'Press Start 2P',ui-monospace,Menlo,monospace;background-color:#070a1c;
+ background-image:linear-gradient(45deg,#0c1132 25%,transparent 25%,transparent 75%,#0c1132 75%),linear-gradient(45deg,#0c1132 25%,transparent 25%,transparent 75%,#0c1132 75%);
+ background-size:8px 8px;background-position:0 0,4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+ padding:calc(16px + env(safe-area-inset-top,0px)) 14px calc(16px + env(safe-area-inset-bottom,0px));-webkit-font-smoothing:none;-webkit-tap-highlight-color:transparent}
+h1{margin:0;font-size:clamp(16px,5vw,24px);font-weight:400;color:#ffd23f;text-shadow:3px 3px 0 #b3261b,6px 6px 0 #000;text-align:center;line-height:1.4}
+p.sub{margin:-6px 0 0;font-size:9px;color:#9aa6e0;text-align:center}
+.games{display:flex;flex-direction:column;gap:18px;width:min(100%,420px)}
+a.g{display:block;text-decoration:none;color:#fff;background:#151c46;border:3px solid #fff;box-shadow:inset 0 0 0 2px #05071a,inset 4px 4px 0 2px #3d4bb0,6px 6px 0 rgba(0,0,0,.55);
+ clip-path:polygon(0 3px,3px 3px,3px 0,calc(100% - 3px) 0,calc(100% - 3px) 3px,100% 3px,100% calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,3px calc(100% - 3px),0 calc(100% - 3px));
+ padding:10px;transition:transform .08s steps(1)}
+a.g:active{transform:translate(3px,3px)}
+a.g canvas{display:block;width:100%;aspect-ratio:2/1;image-rendering:pixelated;border:2px solid #000}
+a.g b{display:flex;justify-content:space-between;align-items:center;font-weight:400;font-size:clamp(12px,4vw,16px);margin-top:10px;color:#ffd23f;text-shadow:2px 2px 0 #000}
+a.g b span{font-size:9px;color:#9aa6e0;text-shadow:none}
+a.g small{display:block;margin-top:8px;font-size:8px;line-height:1.6;color:#c9cfee}
+</style>
+</head>
+<body>
+<h1>ВЫБЕРИ ИГРУ</h1>
+<p class="sub">TikTok LIVE · подарки зрителей</p>
+<div class="games">
+  <a class="g" href="/race"><canvas id="cr" width="96" height="48"></canvas><b>ГОНКА <span>▶</span></b><small>5 болидов, подарки — очки, кто первым до финиша</small></a>
+  <a class="g" href="/ball"><canvas id="cb" width="96" height="48"></canvas><b>ФУТБОЛ-БАТТЛ <span>▶</span></b><small>2 игрока, мячи в корзины, 3 раунда</small></a>
+</div>
+<script>
+/* маленькие пиксельные картинки игр */
+function r(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}
+(function(){var g=document.getElementById('cr').getContext('2d');
+ r(g,0,0,96,48,'#5fb4ff');r(g,0,10,96,8,'#2f9a45');r(g,0,18,96,26,'#4a4f63');r(g,0,44,96,4,'#2f9a45');
+ for(var x=0;x<96;x+=8){r(g,x,30,4,1,'#f4f4f4')}r(g,80,18,2,26,'#fff');for(var y=18;y<44;y+=4){r(g,80,y,2,2,'#000')}
+ var cars=[['#ef4444',22,20],['#3b82f6',40,26],['#f2c12e',58,34]];
+ cars.forEach(function(c){var x=c[1],y=c[2];r(g,x,y+2,16,3,c[0]);r(g,x+4,y,6,2,c[0]);r(g,x+6,y,2,1,'#111');r(g,x+14,y+1,3,4,c[0]);r(g,x-2,y,2,5,'#222');
+  r(g,x+1,y+4,4,3,'#111');r(g,x+11,y+4,4,3,'#111');r(g,x+2,y+5,2,1,'#888');r(g,x+12,y+5,2,1,'#888')});
+ for(var k=0;k<14;k++)r(g,(k*13)%96,2+(k*5)%7,2,1,'#fff')})();
+(function(){var g=document.getElementById('cb').getContext('2d');
+ r(g,0,0,96,48,'#0b1030');for(var y=2;y<16;y+=3)for(var x=(y%2);x<96;x+=3)r(g,x,y,2,2,['#ef4444','#3b82f6','#f2c12e','#fff'][(x+y)%4]);
+ r(g,0,17,96,3,'#f4f4f4');r(g,0,20,96,28,'#2f9a45');for(var y=22;y<48;y+=6)r(g,0,y,96,3,'#3aa84f');r(g,47,20,1,28,'#d8f0dc');
+ function bin(x,c){r(g,x,8,14,1,'#fff');for(var y=9;y<19;y++){var w=14-Math.floor((y-9)/2);r(g,x+(14-w)/2,y,w,1,'#0d1230');for(var k=1;k<w;k+=3)r(g,x+(14-w)/2+k,y,1,1,c)}r(g,x+2,18,10,2,c)}
+ bin(14,'#3b82f6');bin(68,'#ef4444');
+ function pl(x,c,d){r(g,x,28,4,6,c);r(g,x,34,4,3,'#f4f4f4');r(g,x,37,1,5,'#f6cfa8');r(g,x+3,37,1,5,'#f6cfa8');r(g,x-1,42,3,1,'#111');r(g,x+2,42,3,1,'#111');
+  r(g,x-1,22,6,6,c);r(g,x,23,4,4,'#fff');r(g,x+1,24,2,2,c)}
+ pl(20,'#ef4444',1);pl(72,'#3b82f6',-1);
+ r(g,42,10,5,5,'#fff');r(g,43,11,2,2,'#1a1d33');r(g,45,13,1,1,'#1a1d33');for(var k=0;k<5;k++)r(g,36-k*3,13+k*2,2,2,['#ffd23f','#ffb21a','#ff8a1a','#e0621a','#8a2a0a'][k])})();
+</script>
+</body>
+</html>
