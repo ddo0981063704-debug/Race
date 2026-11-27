@@ -246,6 +246,13 @@ html.app #fsb{display:none}
 #autob{min-width:52px;padding:0;--b:#c0283c;--l:#ef5a6c;--d:#5a0c18}
 #autob.on{--b:#18a058;--l:#5fe39a;--d:#0b5a30;animation:none}
 #setb{min-width:64px;padding:8px 12px}
+/* кнопки подарков: красный игрок слева, синий справа */
+#gifts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:7px 10px!important}
+#gifts .row{gap:4px;flex-wrap:nowrap;min-width:0}
+#gifts .row .gicon{display:none}
+#gifts .row:nth-child(2){border-left:0;padding-left:0;border-right:6px solid #555;padding-right:6px;border-right-color:inherit}
+#gifts button{min-width:0;padding:5px 1px 6px}
+#gifts button img:not(.bl){width:min(34px,72%);height:auto;aspect-ratio:1}
 </style>
 </head>
 <body>
@@ -1088,7 +1095,7 @@ function build(){
  initGfx();vwRender();setTimeout(vwTick,1500);
  var g=document.getElementById('gifts');g.innerHTML='';
  CARS.forEach(function(o,i){
-  var d=document.createElement('div');d.className='row';d.style.borderLeftColor=o.c;
+  var d=document.createElement('div');d.className='row';d.style.borderLeftColor=o.c;d.style.borderRightColor=o.c;
   d.insertAdjacentHTML('beforeend','<span class="gicon" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>');
   var pr=document.createElement('div');pr.className='prow';
   pr.innerHTML='<span class="num" data-i="'+i+'" style="background:'+o.c+'">'+(i+1)+'</span>';
